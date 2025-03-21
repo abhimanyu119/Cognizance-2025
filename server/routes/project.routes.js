@@ -7,6 +7,8 @@ const {
   deleteProject,
   assignFreelancer,
 } = require("../controllers/projectController");
+const validators = require("../utils/validators");
+const validate = require("../middleware/validate");
 
 const router = express.Router();
 
@@ -15,17 +17,34 @@ const roleCheck = require("../middleware/roleCheck");
 
 router
   .route("/")
-  .get(getProjects)
-  .post(auth, roleCheck("employer", "admin"), createProject);
+  .get(validate(validators.pagination), getProjects)
+  .post(
+    auth,
+    roleCheck("employer", "admin"),
+    validate(validators.createProject),
+    createProject
+  );
 
 router
   .route("/:id")
-  .get(getProject)
-  .put(auth, updateProject)
-  .delete(auth, deleteProject);
+  .get(validate(validators.idParam), getProject)
+  .put(
+    auth,
+    validate([...validators.idParam, ...validators.createProject]),
+    updateProject
+  )
+  .delete(auth, validate(validators.idParam), deleteProject);
 
 router
   .route("/:id/assign")
-  .put(auth, roleCheck("employer", "admin"), assignFreelancer);
+  .put(
+    auth,
+    roleCheck("employer", "admin"),
+    validate([
+      ...validators.idParam,
+      body("freelancerId").isMongoId().withMessage("Invalid freelancer ID"),
+    ]),
+    assignFreelancer
+  );
 
 module.exports = router;

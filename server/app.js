@@ -2,16 +2,34 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const fileUpload = require("express-fileupload");
+const path = require("path");
 const config = require("./config/env");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
-
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// File upload middleware
+app.use(
+  fileUpload({
+    createParentPath: true,
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB max
+    },
+    abortOnLimit: true,
+    responseOnLimit: "File size limit exceeded (10MB)",
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
+);
+
+// Static folder
+app.use(express.static(path.join(__dirname, "public")));
 
 // Request logging
 if (config.NODE_ENV === "development") {
@@ -27,7 +45,6 @@ app.use("/api/payments", require("./routes/payment.routes"));
 app.use("/api/disputes", require("./routes/dispute.routes"));
 app.use("/api/reviews", require("./routes/review.routes"));
 app.use("/api/notifications", require("./routes/notification.routes"));
-
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to FreeLance Fair API" });

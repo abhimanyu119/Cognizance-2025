@@ -1,7 +1,7 @@
 {
   "name": "freelance-fair-backend",
   "version": "1.0.0",
-  "description": "Backend API for FreeLance Fair platform",
+  "description": "Backend API for FreeLance Fair platform with milestone-based payments and AI verification",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -23,11 +23,15 @@
     "mongoose": "^8.0.2",
     "morgan": "^1.10.0",
     "stripe": "^14.7.0",
+    "uuid": "^9.0.1",
     "winston": "^3.11.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
     "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
