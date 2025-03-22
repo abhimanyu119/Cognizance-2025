@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { GoogleLogin } from "@react-oauth/google";
 import googleIcon from "../assets/images/google_icon.svg";
@@ -9,6 +9,7 @@ import axiosInstance from "../utils/axiosInstance";
 import { useAuth } from "../contexts/AuthContext";
 
 const Login = () => {
+
   const {
     register,
     handleSubmit,
@@ -16,10 +17,18 @@ const Login = () => {
   } = useForm({
     mode: "onChange",
   });
-  const {setIsLoggedIn} = useAuth();
-
 
   const navigate = useNavigate();
+  const { token, setIsLoggedIn } = useAuth();  
+  useEffect(() => {
+    if (token) {
+      navigate("/home");
+    }
+  }, [token, navigate]);
+
+
+
+
   const [focused, setFocused] = useState(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
