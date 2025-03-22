@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axiosInstance from "../utils/axiosInstance";
+import { useAuth } from "../contexts/AuthContext";
 
 const Login = () => {
   const {
@@ -15,6 +16,7 @@ const Login = () => {
   } = useForm({
     mode: "onChange",
   });
+  const { setIsLoggedIn } = useAuth();
 
   const navigate = useNavigate();
   const [focused, setFocused] = useState(null);
@@ -22,13 +24,15 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axiosInstance.post("/api/auth/login", data);
-
+      const response = await axiosInstance.post("/api/auth/login", data, {showToast: true, toastMessage: "Successfully logged in!"});
+      console.log(response.data);
       // Store authentication token
-      localStorage.setItem("authToken", response.data.token);
+      localStorage.setItem("authToken", response.data.token,{showToast: true, toastMessage: "Successfully logged in!"});
 
-      toast.success("Login successful!");
-      setTimeout(() => navigate("/dashboard"), 1500);
+        localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      setIsLoggedIn(true);
+      navigate("/home");
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Login failed. Please try again."
