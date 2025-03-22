@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "dotenv": "^16.4.7",
-    "path": "^0.12.7"
+    "express-validator": "^7.2.1"
   }
 }
