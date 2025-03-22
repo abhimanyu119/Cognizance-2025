@@ -17,9 +17,30 @@ import  Layout from "./components/Layout";
 const isLoggedIn = () => localStorage.getItem("token");
 
 
+
+
 export default function App() {
   return (
     <>
+    <ToastContainer 
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        toastStyle={{
+          background: "#1E293B",
+          color: "#F8FAFC",
+          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.4)",
+          borderRadius: "12px",
+          border: "1px solid rgba(255, 255, 255, 0.05)"
+        }}
+      />
     <AuthProvider>
       <UserProvider>
         <Router>
