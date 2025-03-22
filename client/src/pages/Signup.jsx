@@ -7,6 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axiosInstance from "../utils/axiosInstance";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useAuth } from "../contexts/AuthContext";
 
 const Signup = () => {
   const {
@@ -19,17 +20,21 @@ const Signup = () => {
 
   const navigate = useNavigate();
   const [focused, setFocused] = useState(null);
+  const {setIsLoggedIn} = useAuth();
 
   const onSubmit = async (data) => {
     try {
-      await axiosInstance.post("/api/auth/register", data);
-      toast.success("Account created successfully!");
-      setTimeout(() => navigate("/login"), 1500);
+      const response = await axiosInstance.post("/api/auth/register", data,{showToast:true});
+      console.log(response)
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      setIsLoggedIn(true);
+      navigate("/home");
+      
+      // toast.success("Account created successfully!");
+      // setTimeout(() => navigate("/login"), 1500);
     } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-          "Registration failed. Please try again."
-      );
+      
       console.error(error);
     }
   };
@@ -60,12 +65,13 @@ const Signup = () => {
 
         const response = await axiosInstance.post(
           "/api/auth/google-signup",
-          userData
+          userData,{showToast: true,}
         );
-        toast.success("Account created successfully!");
-        setTimeout(() => navigate("/login"), 1500);
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        setIsLoggedIn(true);
+        navigate("/home");
       } catch (error) {
-        toast.error("Google signup failed. Please try again.");
         console.error(error);
       }
     },

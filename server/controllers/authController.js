@@ -18,7 +18,7 @@ exports.register = async (req, res, next) => {
       password,
       role: role || "freelancer",
     });
-
+    console.log("user:", user);
     sendTokenResponse(user, 201, res);
   } catch (err) {
     next(err);
@@ -193,6 +193,7 @@ exports.logout = async (req, res, next) => {
 // Helper function to get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.getSignedJwtToken();
+  console.log("token:", token);
 
   const userData = {
     id: user._id,
@@ -203,7 +204,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 
   res.status(statusCode).json({
     success: true,
-    token,
+    token:token,
     user: userData,
   });
 };
