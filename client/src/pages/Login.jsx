@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import 'react-toastify/dist/ReactToastify.css';
 
-// import loaderIcon from '../assets/images/loader_icon2.svg'
-// import googleIcon from '../assets/images/google_icon.svg'
+import loaderIcon from '../assets/images/loader_icon2.svg'
+import googleIcon from '../assets/images/google_icon.svg'
 import axiosInstance from '../utils/axiosInstance';
 import { useAuth } from '../contexts/AuthContext';
 import { useUser } from '../contexts/UserContext';
@@ -19,45 +19,53 @@ const login = () => {
   const {setIsLoggedIn} = useAuth();
   const {user} = useUser();
 
+   // 🔥 Check token in localStorage on component mount
+   useEffect(() => {
+    const tokenData = localStorage.getItem("token");
+    if (tokenData) {
+      navigate('/home');
+    }
+  }, [navigate]);
 
   const handleLogin = async (data) => {
     try {
       setIsSubmitting(true);
+      console.log("data: ", data);
       //using axiosInstance with interceptors
-      // const response = await axiosInstance.post("/api/auth/login", data,
-      // {
-      //   showToast: true,
-      //   toastMessage: "Login successful"
-      // });
-      // console.log("Login Successful:", response.data);
-      
-    
-      // localStorage.setItem('user', JSON.stringify(response.data.user));
-      // localStorage.setItem('token', response.data.token);
-      console.log("1");
-      localStorage.setItem('user', {
-        id: 1,
-        username: 'Kaushal',
-        email: 'kaushal@example.com',
-        role: 'Employer', // or 'Freelancer'
-        avatar: '',
-        unreadMessages: 3,
-        unreadNotifications: 5,
-        createdAt: new Date().toISOString()
+      const response = await axiosInstance.post("/api/auth/login", data,
+      {
+        showToast: true,
+        toastMessage: "Login successful"
       });
-      localStorage.setItem('token', "tokenxyz");
+      console.log("Login Successful:", response.data);
+    
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('token', response.data.token);
+
+      // localStorage.setItem('user', {
+      //   id: 1,
+      //   username: 'Kaushal',
+      //   email: 'kaushal@example.com',
+      //   role: 'Employer', // or 'Freelancer'
+      //   avatar: '',
+      //   unreadMessages: 3,
+      //   unreadNotifications: 5,
+      //   createdAt: new Date().toISOString()
+      // });
+      // localStorage.setItem('token', "tokenxyz");
       
-      setIsLoggedIn(true);
-      setIsSubmitting(false);
+      // setIsLoggedIn(true);
+      // setIsSubmitting(false);
       
       
       navigate('/home');
     } 
     catch (error) {
       setIsSubmitting(false);
-      console.log("error: ", error.response);
+      console.log("error: ", response.data.error);
     }
   };
+
 
   return (
     <div className="bg-stone-200 flex items-center w-full h-screen">

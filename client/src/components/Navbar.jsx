@@ -3,11 +3,13 @@ import { Link, useLocation } from "react-router-dom";
 import Avatar from "./Avatar";
 import { BellIcon, MessageSquareIcon, MenuIcon, XIcon } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { useUser } from "../contexts/UserContext";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user } = useUser();
   const { isLoggedIn } = useAuth();
   
   
@@ -46,7 +48,7 @@ export default function Navbar() {
     
     //Freelancers
     return [
-      { to: "/browse-jobs", label: "Browse Jobs" },
+      { to: "/find-projects", label: "find projects" },
       { to: "/how-it-works", label: "How it Works" }
     ];
   };
@@ -54,7 +56,7 @@ export default function Navbar() {
   // Profile dropdown menu items
   const getProfileMenuItems = () => {
     const commonItems = [
-      { to: `/profile/${userData.username}`, label: "My Profile" },
+      { to: `/profile/${user.username}`, label: "My Profile" },
       { to: "/settings", label: "Settings" },
       { to: "/logout", label: "Logout" }
     ];

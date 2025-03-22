@@ -94,6 +94,11 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    accountStatus: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
     createdAt: {
       type: Date,
       default: Date.now,

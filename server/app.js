@@ -10,7 +10,13 @@ const errorHandler = require("./middleware/errorHandler");
 const app = express();
 
 app.use(helmet());
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:5173', // Frontend URL
+  credentials: true,               // Allow cookies/auth headers
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
