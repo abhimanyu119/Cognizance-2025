@@ -56,7 +56,7 @@ export default function Navbar() {
   // Profile dropdown menu items
   const getProfileMenuItems = () => {
     const commonItems = [
-      { to: `/profile/${user.username}`, label: "My Profile" },
+      { to: `/user/${user.name}`, label: "My Profile" },
       { to: "/settings", label: "Settings" },
       { to: "/logout", label: "Logout" }
     ];
@@ -84,7 +84,7 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center mr-5">
             <Link to="/" className="text-xl font-bold text-blue-600">
-              SkillBridge
+              PayCraft
             </Link>
           </div>
           

@@ -39,7 +39,8 @@ export default function App() {
           <Route element={<ProtectedRoute/>}>
             <Route path="/home" element={<Home />} />
             <Route path="/find-projects" element={<FindProjects />} />
-            <Route path="/profile" element={<Profile />} />
+
+            <Route path="/user/:name" element={<Profile />} />
           </Route>
         </Route>
         <Route path="*" element={<NotFound />} /> {/* 404 Route */}

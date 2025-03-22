@@ -11,14 +11,24 @@ const app = express();
 
 const allowedOrigins = [process.env.FRONTEND_URL.trim()];
 
-app.use(helmet());
-
+app.use(helmet({crossOriginOpenerPolicy: { policy: 'unsafe-none' }},{crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }}));
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  next();
+});
 app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Headers",
+    ],
+    credentials: true,
   })
 );
 app.options("*", (req, res) => {
