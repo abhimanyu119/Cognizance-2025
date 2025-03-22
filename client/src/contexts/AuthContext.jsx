@@ -3,7 +3,7 @@ import { createContext, useState, useContext, useEffect } from 'react';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -12,34 +12,11 @@ export const AuthProvider = ({ children }) => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
-      setIsAuthenticated(true);
+      setIsLoggedIn(true);
     }
     setLoading(false);
   }, []);
 
-  const login = async (credentials) => {
-    try {
-      setLoading(true);
-      // In a real app, you would make an API call here
-      // const response = await api.post('/auth/login', credentials);
-      // const { token } = response.data;
-      
-      // For demo purposes:
-      const token = 'demo-token-12345';
-      
-      localStorage.setItem('token', token);
-      setToken(token);
-      setIsAuthenticated(true);
-      return { success: true };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error.message || 'Login failed' 
-      };
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const signup = async (userData) => {
     try {
@@ -53,7 +30,7 @@ export const AuthProvider = ({ children }) => {
       
       localStorage.setItem('token', token);
       setToken(token);
-      setIsAuthenticated(true);
+      setIsLoggedIn(true);
       return { success: true };
     } catch (error) {
       return { 
@@ -68,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
-    setIsAuthenticated(false);
+    setIsLoggedIn(false);
   };
 
   const checkAuth = () => {
@@ -76,12 +53,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = {
-    isAuthenticated,
+    isLoggedIn,
+    setIsLoggedIn,
     token,
-    login,
     signup,
     logout,
     loading,
+    setToken,
     checkAuth
   };
 

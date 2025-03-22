@@ -13,7 +13,7 @@ const ProtectedRoute = ({
   redirectPath = '/login',
   children 
 }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isLoggedIn, loading } = useAuth();
 
   // Show loader while checking authentication
   if (loading) {
@@ -21,7 +21,7 @@ const ProtectedRoute = ({
   }
 
   // Redirect to login if not authenticated
-  if (!isAuthenticated) {
+  if (!isLoggedIn) {
     return <Navigate to={redirectPath} replace />;
   }
 

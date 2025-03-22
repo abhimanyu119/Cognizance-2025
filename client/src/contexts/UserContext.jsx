@@ -4,13 +4,13 @@ import { useAuth } from './AuthContext';
 const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
-  const { token, isAuthenticated } = useAuth();
+  const { token, isLoggedIn } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!isAuthenticated || !token) {
+      if (!isLoggedIn || !token) {
         setUser(null);
         setLoading(false);
         return;
@@ -44,7 +44,7 @@ export const UserProvider = ({ children }) => {
     };
 
     fetchUserData();
-  }, [token, isAuthenticated]);
+  }, [token, isLoggedIn]);
 
   const updateProfile = async (profileData) => {
     try {
@@ -85,5 +85,5 @@ export const useUser = () => {
   }
   return context;
 };
-
+  
 export default UserContext;
