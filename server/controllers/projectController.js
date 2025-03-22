@@ -187,7 +187,7 @@ exports.deleteProject = async (req, res, next) => {
       });
     }
 
-    await project.remove();
+    await Project.deleteOne({ _id: project._id });
 
     res.status(200).json({
       success: true,

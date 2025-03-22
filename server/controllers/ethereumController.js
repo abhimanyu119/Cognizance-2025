@@ -545,9 +545,8 @@ exports.getTransactionHistory = async (req, res) => {
           }
           break;
         case "MilestoneAdded":
-          description = `Milestone "${
-            event.args && event.args.title ? event.args.title : ""
-          }" added`;
+          description = `Milestone "${event.args && event.args.title ? event.args.title : ""
+            }" added`;
           if (event.args && event.args.amount) {
             amount = ethers.utils.formatEther(event.args.amount);
           }

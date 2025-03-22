@@ -7,6 +7,7 @@ const aiVerificationService = require("../services/aiVerificationService");
 
 // Modify your createSubmission function to trigger AI verification
 exports.createSubmission = async (req, res, next) => {
+
   try {
     req.body.milestoneId = req.params.milestoneId;
     req.body.freelancerId = req.user.id;
@@ -27,15 +28,23 @@ exports.createSubmission = async (req, res, next) => {
     }
 
     const project = await Project.findById(milestone.projectId);
+    // if (
+    //   project.freelancerId.toString() !== req.user.id &&
+    //   req.user.role !== "admin"
+    // ) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     error: "Not authorized to submit work for this milestone",
+    //   });
+    // }
     if (
-      project.freelancerId.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
+      project.freelancerId.toString() == req.user.id) {
       return res.status(403).json({
         success: false,
         error: "Not authorized to submit work for this milestone",
       });
     }
+
 
     // Handle file uploads
     if (req.files) {
