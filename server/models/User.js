@@ -94,6 +94,22 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    googleId: {
+    type: String,
+    default: null
+  },
+  isGoogleUser: {
+    type: Boolean,
+    default: false
+  },
+  profileImage: {
+    type: String,
+    default: null
+  },
+  isProfileComplete: {
+    type: Boolean,
+    default: false
+  },
     accountStatus: {
       type: String,
       enum: ["active", "inactive"],
