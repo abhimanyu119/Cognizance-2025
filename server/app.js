@@ -9,14 +9,26 @@ const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
-app.use(helmet());
-const corsOptions = {
-  origin: 'http://localhost:5173', // Frontend URL
-  credentials: true,               // Allow cookies/auth headers
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-};
+const allowedOrigins = [process.env.FRONTEND_URL.trim()];
 
-app.use(cors(corsOptions));
+app.use(helmet());
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  return res.sendStatus(204);
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

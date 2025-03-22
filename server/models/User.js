@@ -132,5 +132,9 @@ UserSchema.methods.getSignedJwtToken = function () {
 UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+savedUsers: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User' 
+}],
 
 module.exports = mongoose.model("User", UserSchema);

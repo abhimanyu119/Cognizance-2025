@@ -249,7 +249,7 @@ export default function Navbar() {
                 <div className="mt-3 space-y-1 px-2">
                   <Link 
                     to="/messages" 
-                    className="flex justify-between items-center block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                    className="flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <span>Messages</span>
@@ -261,7 +261,7 @@ export default function Navbar() {
                   </Link>
                   <Link 
                     to="/notifications" 
-                    className="flex justify-between items-center block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                    className="flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <span>Notifications</span>

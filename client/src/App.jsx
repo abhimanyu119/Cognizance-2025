@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import Profile from "./pages/Profile";
 import { AuthProvider } from "./contexts/AuthContext"; 
 import { UserProvider } from "./contexts/UserContext";
@@ -23,6 +24,7 @@ const isLoggedIn = () => localStorage.getItem("token");
 export default function App() {
   return (
     <>
+    <GoogleOAuthProvider clientId="324833732952-4hp1j6o6fk7v7m99mh59gunmrdp9659q.apps.googleusercontent.com">
     <AuthProvider>
       <UserProvider>
         <Router>
@@ -46,6 +48,8 @@ export default function App() {
       </UserProvider>
     </AuthProvider>
     <ToastContainer />
+    </GoogleOAuthProvider>
     </>
   );
 }
+
