@@ -18,6 +18,8 @@ const Login = () => {
     mode: "onChange",
   });
 
+  const { setIsLoggedIn } = useAuth();
+
   const navigate = useNavigate();
   const { token, setIsLoggedIn } = useAuth();  
   useEffect(() => {
@@ -35,15 +37,16 @@ const Login = () => {
   const onSubmit = async (data) => {
     
     try {
-      const response = await axiosInstance.post("/api/auth/login", data,{showtoast:true,toastMessage:"Successfully logged in!"});
+      const response = await axiosInstance.post("/api/auth/login", data, {showToast: true, toastMessage: "Successfully logged in!"});
       console.log(response.data);
       // Store authentication token
-      localStorage.setItem("authToken", response.data.token,{showtoast:true,toastMessage:"Successfully logged in!"});
+      localStorage.setItem("authToken", response.data.token,{showToast: true, toastMessage: "Successfully logged in!"});
 
         localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-        setIsLoggedIn(true);
-        navigate("/home");
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      setIsLoggedIn(true);
+      navigate("/home");
+
     } catch (error) {
       
       console.error(error);
