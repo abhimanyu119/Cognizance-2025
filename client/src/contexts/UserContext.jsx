@@ -22,14 +22,16 @@ export const UserProvider = ({ children }) => {
         setLoading(true);
         
         const response = await axiosInstance.get('api/auth/me');
-        console.log("response: ", response.data);
-        setUser(response.data);
+        console.log("response here: ", response.data.data);
+        setUser(response.data.data);
+        console.log("done");
 
       } catch (error) {
         console.error('Failed to fetch user data:', error);
         setUser(null);
       } finally {
         setLoading(false);
+        console.log(user);
       }
     };
 
@@ -64,6 +66,13 @@ export const UserProvider = ({ children }) => {
     isEmployer: user?.role === 'Employer',
     isFreelancer: user?.role === 'Freelancer'
   };
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-screen text-xl text-gray-600">
+        Loading user data...
+      </div>
+    );
+  }
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
