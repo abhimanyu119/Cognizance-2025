@@ -25,7 +25,7 @@ const login = () => {
     if (tokenData) {
       navigate('/home');
     }
-  }, [navigate]);
+  }, []);
 
   const handleLogin = async (data) => {
     try {
@@ -41,6 +41,7 @@ const login = () => {
     
       localStorage.setItem('user', JSON.stringify(response.data.user));
       localStorage.setItem('token', response.data.token);
+      setIsLoggedIn(true);
 
       // localStorage.setItem('user', {
       //   id: 1,
@@ -61,8 +62,9 @@ const login = () => {
       navigate('/home');
     } 
     catch (error) {
-      setIsSubmitting(false);
       console.log("error: ", response.data.error);
+    }finally{
+    setIsSubmitting(false);
     }
   };
 
