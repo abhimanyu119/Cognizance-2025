@@ -40,7 +40,7 @@ export default function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/find-projects" element={<FindProjects />} />
 
-            <Route path="/user/:username" element={<Profile />} />
+            <Route path="/user/:name" element={<Profile />} />
           </Route>
         </Route>
         <Route path="*" element={<NotFound />} /> {/* 404 Route */}
