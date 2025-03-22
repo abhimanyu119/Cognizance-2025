@@ -11,14 +11,6 @@ const {
 } = require("../controllers/ethereumController");
 
 const auth = require("../middleware/auth");
-// At the top of ethereum.routes.js, add these logs:
-console.log("createProjectFunding:", typeof createProjectFunding);
-console.log("addMilestoneFunding:", typeof addMilestoneFunding);
-console.log("startMilestone:", typeof startMilestone);
-console.log("submitForReview:", typeof submitForReview);
-console.log("approveMilestone:", typeof approveMilestone);
-console.log("raiseDispute:", typeof raiseDispute);
-console.log("getTransactionHistory:", typeof getTransactionHistory);
 const roleCheck = require("../middleware/roleCheck");
 
 const router = express.Router();
