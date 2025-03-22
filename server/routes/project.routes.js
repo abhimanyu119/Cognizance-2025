@@ -13,8 +13,14 @@ const validate = require("../middleware/validate");
 
 const router = express.Router();
 
+
+// Include milestone router for nested routes
+const milestoneRouter = require('./milestone.routes');
+
 const auth = require("../middleware/auth");
 const roleCheck = require("../middleware/roleCheck");
+// Re-route into milestone routes
+router.use('/:projectId/milestones', milestoneRouter);
 
 router
   .route("/")

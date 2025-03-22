@@ -1,4 +1,7 @@
 const express = require("express");
+const router = express.Router({ mergeParams: true }); // Important for nested routes
+const submissionRoutes = require("./submission.routes");
+const auth = require("../middleware/auth");
 const {
   getMilestones,
   getMilestone,
@@ -6,32 +9,25 @@ const {
   updateMilestone,
   deleteMilestone,
   startMilestone,
+  // Add other milestone controller functions
 } = require("../controllers/milestoneController");
 
-const router = express.Router({ mergeParams: true });
+// Re-route into submission router
+router.use("/:milestoneId/submissions", submissionRoutes);
 
-const auth = require("../middleware/auth");
-const roleCheck = require("../middleware/roleCheck");
-
-// Re-route into submission routes
-const submissionRouter = require("./submission.routes");
-router.use("/:milestoneId/submissions", submissionRouter);
-
-router
-  .route("/")
+// Get all milestones for a project
+router.route("/")
   .get(getMilestones)
-  .post(auth, roleCheck("employer", "admin"), createMilestone);
+  .post(auth, createMilestone);
 
-router
-  .route("/:id")
+// Single milestone routes
+router.route("/:id")
   .get(getMilestone)
   .put(auth, updateMilestone)
   .delete(auth, deleteMilestone);
 
-router.route("/:id/start").put(auth, roleCheck("freelancer"), startMilestone);
+// Special milestone actions
+router.route("/:id/start")
+  .put(auth, startMilestone);
 
 module.exports = router;
-
-// Include the following in project.routes.js to enable nested routes
-// const milestoneRouter = require('./milestone.routes');
-// router.use('/:projectId/milestones', milestoneRouter);
