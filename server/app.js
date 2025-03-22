@@ -42,6 +42,7 @@ app.use("/api/projects", require("./routes/project.routes"));
 app.use("/api/milestones", require("./routes/milestone.routes"));
 app.use("/api/submissions", require("./routes/submission.routes"));
 app.use("/api/payments", require("./routes/payment.routes"));
+app.use("/api/ethereum", require("./routes/ethereum.routes"));
 app.use("/api/disputes", require("./routes/dispute.routes"));
 app.use("/api/reviews", require("./routes/review.routes"));
 app.use("/api/notifications", require("./routes/notification.routes"));
