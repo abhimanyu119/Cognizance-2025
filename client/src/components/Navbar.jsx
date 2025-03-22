@@ -8,7 +8,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const location = useLocation();
-  const { setToken,isLoggedIn, setIsLoggedIn } = useAuth();
+  const { isLoggedIn } = useAuth();
   
   
   // Auth state would come from your AuthContext in a real app

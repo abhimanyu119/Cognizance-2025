@@ -51,7 +51,7 @@ const login = () => {
       setIsSubmitting(false);
       
       
-      navigate('/');
+      navigate('/home');
     } 
     catch (error) {
       setIsSubmitting(false);
