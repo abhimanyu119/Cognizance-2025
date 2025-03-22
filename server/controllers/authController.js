@@ -1,7 +1,8 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const logger = require("../config/logger");
 
 // @desc    Register user
@@ -18,7 +19,7 @@ exports.register = async (req, res, next) => {
       password,
       role: role || "freelancer",
     });
-    console.log("user:", user);
+
     sendTokenResponse(user, 201, res);
   } catch (err) {
     next(err);
@@ -159,6 +160,39 @@ exports.login = async (req, res, next) => {
   }
 };
 
+// @desc    Authenticate user login with Google OAuth
+// @route   POST /api/auth/google-login
+// @access  Public
+exports.googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    // Verify the Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    // Get the payload from the verified token
+    const payload = ticket.getPayload();
+    const { email, name, sub: googleId, picture } = payload;
+
+    // Rest of your existing Google login logic
+    let user = await User.findOne({
+      $or: [{ email }, { googleId }],
+    });
+
+    // [... rest of your existing code ...]
+  } catch (error) {
+    console.error("Google Login Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error during Google login",
+      error: error.message,
+    });
+  }
+};
+
 // @desc    Get current logged in user
 // @route   GET /api/auth/me
 // @access  Private
@@ -193,7 +227,6 @@ exports.logout = async (req, res, next) => {
 // Helper function to get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.getSignedJwtToken();
-  console.log("token:", token);
 
   const userData = {
     id: user._id,
@@ -204,7 +237,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 
   res.status(statusCode).json({
     success: true,
-    token:token,
+    token,
     user: userData,
   });
 };

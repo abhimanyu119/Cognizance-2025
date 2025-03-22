@@ -24,32 +24,33 @@ const isLoggedIn = () => localStorage.getItem("token");
 export default function App() {
   return (
     <>
-    <GoogleOAuthProvider clientId="324833732952-4hp1j6o6fk7v7m99mh59gunmrdp9659q.apps.googleusercontent.com">
-    <AuthProvider>
-      <UserProvider>
-        <Router>
+      <GoogleOAuthProvider
+        clientId="324833732952-4hp1j6o6fk7v7m99mh59gunmrdp9659q.apps.googleusercontent.com"
+        cookiePolicy={"single_host_origin"}
+        hosted_domain={"http://localhost:5173"}
+      >
+        <AuthProvider>
+          <UserProvider>
+            <Router>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Landing />} />
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/find-projects" element={<FindProjects />} />
 
-      <Routes>
-        
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-
-        <Route element={<Layout />}>
-          <Route path="/" element={<Landing />} />
-          <Route element={<ProtectedRoute/>}>
-            <Route path="/home" element={<Home />} />
-            <Route path="/find-projects" element={<FindProjects />} />
-
-            <Route path="/user/:username" element={<Profile />} />
-          </Route>
-        </Route>
-        <Route path="*" element={<NotFound />} /> {/* 404 Route */}
-      </Routes>
-    </Router>
-      </UserProvider>
-    </AuthProvider>
-    <ToastContainer />
-    </GoogleOAuthProvider>
+                    <Route path="/user/:username" element={<Profile />} />
+                  </Route>
+                </Route>
+                <Route path="*" element={<NotFound />} /> {/* 404 Route */}
+              </Routes>
+            </Router>
+          </UserProvider>
+        </AuthProvider>
+        <ToastContainer />
+      </GoogleOAuthProvider>
     </>
   );
 }
