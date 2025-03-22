@@ -32,7 +32,7 @@ export default function Landing() {
   const showContactToast = () => toast.info("Our sales team will contact you shortly!");
   
   return (
-    <>
+    <div className="hero-wrapper">
       <Helmet>
         <title>PayCraft - Fair Payments for Web Developers</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -40,7 +40,7 @@ export default function Landing() {
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </Helmet>
       
-      <nav data-aos="fade-down" data-aos-delay="100">
+      {/* <nav data-aos="fade-down" data-aos-delay="100">
         <div className="logo">Pay<span>Craft</span></div>
         <div className="nav-links">
           <a href="#features">Features</a>
@@ -49,10 +49,11 @@ export default function Landing() {
           <a href="#pricing">Pricing</a>
         </div>
         <button className="cta-button" onClick={showSuccessToast}>Sign Up Free</button>
-      </nav>
+      </nav> */}
       
       <section className="hero">
         <div className="hero-content" data-aos="fade-right" data-aos-delay="200">
+          hi
           <h1>Empowering Freelancers, Ensuring Fair Payments</h1>
           
           
@@ -392,31 +393,31 @@ export default function Landing() {
             --border-radius: 12px;
         }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Space Grotesk', sans-serif;
-        }
+        // .hero-wrapper{
+        //     margin: 0;
+        //     padding: 0;
+        //     box-sizing: border-box;
+        //     font-family: 'Space Grotesk', sans-serif;
+        // }
         
-        body {
-            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
-            color: var(--light-text);
-            line-height: 1.6;
-        }
+        // .hero-wrapper {
+        //     background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+        //     color: var(--light-text);
+        //     line-height: 1.6;
+        // }
         
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 5%;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(10px);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-        }
+        // nav {
+        //     display: flex;
+        //     justify-content: space-between;
+        //     align-items: center;
+        //     padding: 1.5rem 5%;
+        //     background: rgba(15, 23, 42, 0.8);
+        //     backdrop-filter: blur(10px);
+        //     position: fixed;
+        //     width: 100%;
+        //     top: 0;
+        //     z-index: 1000;
+        // }
         
         .logo {
             font-size: 1.8rem;
@@ -1104,6 +1105,6 @@ export default function Landing() {
             }
         }
       `}</style>
-    </>
+    </div>
   );
 }
