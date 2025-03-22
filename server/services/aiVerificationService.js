@@ -1,395 +1,252 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const config = require("../config/env");
-const logger = require("../config/logger");
 const WorkSubmission = require("../models/WorkSubmission");
 const Milestone = require("../models/Milestone");
-const Project = require("../models/Project");
-const axios = require("axios");
-const fs = require("fs");
-const path = require("path");
+const Notification = require("../models/Notification");
 
 // Initialize Gemini API
-const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /**
- * Process a new submission using AI verification
+ * Verify a submission using AI
  * @param {string} submissionId - The ID of the submission to verify
- * @returns {Object} - Verification result
+ * @returns {Promise<object>} - The verification result
  */
 exports.verifySubmission = async (submissionId) => {
   try {
-    // Get submission details
-    const submission = await WorkSubmission.findById(submissionId);
+    // Get the submission
+    const submission = await WorkSubmission.findById(submissionId)
+      .populate({
+        path: "milestoneId",
+        select: "title description requiredDeliverables",
+        populate: { path: "projectId", select: "title" },
+      })
+      .populate({ path: "freelancerId", select: "name" });
+
     if (!submission) {
       throw new Error("Submission not found");
     }
 
-    // Get milestone and project details
-    const milestone = await Milestone.findById(submission.milestoneId).populate(
-      "projectId"
-    );
-    if (!milestone) {
-      throw new Error("Milestone not found");
-    }
+    // Create a prompt for AI verification
+    const prompt = createVerificationPrompt(submission);
 
-    logger.info(`Starting AI verification for submission ${submissionId}`);
+    // Generate AI response
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const text = response.text();
 
-    // Extract requirements and deliverables for AI analysis
-    const requirements = extractRequirements(milestone);
-    const deliverables = extractDeliverables(submission);
+    // Parse the AI response
+    const aiVerificationResult = parseAIResponse(text);
 
-    // Run AI verification
-    const startTime = Date.now();
-    const verificationResult = await runAIVerification(
-      requirements,
-      deliverables,
-      submission.attachments
-    );
-    const processingTime = Date.now() - startTime;
-
-    logger.info(
-      `AI verification completed in ${processingTime}ms with status: ${verificationResult.status}`
-    );
-
-    // Update submission with verification results
-    await WorkSubmission.findByIdAndUpdate(submissionId, {
-      aiVerification: {
-        result: verificationResult.status,
-        confidence: verificationResult.confidence,
-        feedback: verificationResult.feedback,
-        verifiedAt: new Date(),
-        escalatedToManual: verificationResult.confidence < 0.85,
-      },
-    });
-
-    // Handle verification result
-    if (
-      verificationResult.status === "approved" &&
-      verificationResult.confidence >= 0.85
-    ) {
-      // High confidence approval - automatic approval
-      await handleAutoApproval(submission, milestone);
-      return {
-        status: "auto-approved",
-        message: "Submission automatically approved by AI verification",
-        feedback: verificationResult.feedback,
-      };
-    } else if (
-      verificationResult.status === "rejected" &&
-      verificationResult.confidence >= 0.85
-    ) {
-      // High confidence rejection - automatic rejection
-      await handleAutoRejection(
-        submission,
-        milestone,
-        verificationResult.feedback
-      );
-      return {
-        status: "auto-rejected",
-        message: "Submission automatically rejected by AI verification",
-        feedback: verificationResult.feedback,
-      };
-    } else {
-      // Uncertain or low confidence - escalate to manual review
-      await escalateToManualReview(submission, milestone, verificationResult);
-      return {
-        status: "manual-review",
-        message: "Submission has been escalated for manual review",
-        feedback: verificationResult.feedback,
-      };
-    }
-  } catch (err) {
-    logger.error(`AI verification error: ${err.message}`, { stack: err.stack });
-    // Always default to manual review on error
-    await escalateToManualReview(submission, milestone, {
-      status: "error",
-      confidence: 0,
+    // Update the submission with AI verification result
+    submission.aiVerification = {
+      result: aiVerificationResult.result,
+      confidence: aiVerificationResult.confidence,
       feedback: {
-        strengths: [],
-        issues: ["Error during AI verification"],
-        suggestions: ["Please review manually"],
+        strengths: aiVerificationResult.strengths,
+        issues: aiVerificationResult.issues,
+        suggestions: aiVerificationResult.suggestions,
       },
-    });
-    throw err;
+      verifiedAt: new Date(),
+      escalatedToManual: aiVerificationResult.result === "uncertain",
+    };
+
+    await submission.save();
+
+    // Create notifications
+    if (aiVerificationResult.result === "uncertain") {
+      // Notify admins for manual review
+      const admins = await User.find({ role: "admin" });
+      for (const admin of admins) {
+        await Notification.create({
+          type: "submission",
+          message: `AI verification is uncertain for submission in project ${submission.milestoneId.projectId.title}. Manual review required.`,
+          userId: admin._id,
+          referenceId: submission._id,
+          referenceModel: "WorkSubmission",
+        });
+      }
+    } else {
+      // Notify the employer
+      const milestone = await Milestone.findById(
+        submission.milestoneId
+      ).populate({ path: "projectId", select: "employerId title" });
+
+      await Notification.create({
+        type: "submission",
+        message: `AI verification ${
+          aiVerificationResult.result === "approved" ? "passed" : "failed"
+        } for submission in project ${milestone.projectId.title}.`,
+        userId: milestone.projectId.employerId,
+        referenceId: submission._id,
+        referenceModel: "WorkSubmission",
+      });
+    }
+
+    return submission.aiVerification;
+  } catch (error) {
+    console.error("AI Verification error:", error);
+
+    // If there's an error, mark the verification as error
+    if (submissionId) {
+      await WorkSubmission.findByIdAndUpdate(submissionId, {
+        "aiVerification.result": "error",
+        "aiVerification.verifiedAt": new Date(),
+        "aiVerification.feedback.issues": [
+          "An error occurred during AI verification",
+        ],
+      });
+    }
+
+    throw error;
   }
 };
 
 /**
- * Extract structured requirements from milestone data
+ * Create a prompt for AI verification
+ * @param {object} submission - The submission to verify
+ * @returns {string} - The prompt
  */
-function extractRequirements(milestone) {
-  return {
-    title: milestone.title,
-    description: milestone.description,
-    projectTitle: milestone.projectId.title,
-    projectDescription: milestone.projectId.description,
-    projectRequirements: milestone.projectId.requirements || {},
-    deliverableTypes: milestone.requiredDeliverables || [],
-    // For logo projects, extract specific requirements
-    logoRequirements: milestone.projectId.requirements?.logoDetails || {},
-  };
-}
+function createVerificationPrompt(submission) {
+  return `
+You are an AI verifier for a freelance platform called Cognizance2025. Your task is to verify if a freelancer's submission meets the requirements of a milestone.
 
-/**
- * Extract deliverables from submission data
- */
-function extractDeliverables(submission) {
-  return {
-    description: submission.description,
-    attachmentCount: submission.attachments.length,
-    attachmentTypes: submission.attachments.map((a) => a.type),
-    attachmentNames: submission.attachments.map((a) => a.name),
-  };
-}
+Project Title: ${submission.milestoneId.projectId.title}
+Milestone Title: ${submission.milestoneId.title}
+Milestone Description: ${submission.milestoneId.description}
 
-/**
- * Run AI verification using Gemini API
- */
-async function runAIVerification(requirements, deliverables, attachments) {
-  try {
-    // Prepare image files for Gemini processing
-    const imageAttachments = await prepareImageFiles(attachments);
+Required Deliverables:
+${submission.milestoneId.requiredDeliverables.map((d) => `- ${d}`).join("\n")}
 
-    // Construct prompt for Gemini
-    const prompt = `
-You are a specialized AI reviewer for our milestone-based freelance platform. Your task is to verify if a submitted deliverable meets the specified requirements.
+Freelancer's Submission:
+${submission.description}
 
-# Project Requirements
-Project: ${requirements.projectTitle}
-Project Description: ${requirements.projectDescription}
-Milestone: ${requirements.title}
-Milestone Description: ${requirements.description}
-${
-  requirements.logoRequirements &&
-  Object.keys(requirements.logoRequirements).length > 0
-    ? `
-# Logo-Specific Requirements
-Brand Name: ${requirements.logoRequirements.brandName || "Not specified"}
-Color Scheme: ${requirements.logoRequirements.colorScheme || "Not specified"}
-Style Preferences: ${
-        requirements.logoRequirements.stylePreferences || "Not specified"
-      }
-Industry: ${requirements.logoRequirements.industry || "Not specified"}
-Target Audience: ${
-        requirements.logoRequirements.targetAudience || "Not specified"
-      }
-Required Formats: ${requirements.deliverableTypes.join(", ") || "Not specified"}
-`
-    : ""
-}
-
-# Submitted Deliverables
-Submission Description: ${deliverables.description}
-Number of Attachments: ${deliverables.attachmentCount}
-Attachment Types: ${deliverables.attachmentTypes.join(", ")}
-File Names: ${deliverables.attachmentNames.join(", ")}
-
-# Your Task
-1. Analyze the submitted files and determine if they match the requirements
-2. For logo designs, evaluate if the design elements (colors, style, etc.) match the requirements
-3. Check if all required file formats are provided
-4. Assign a verification status: "approved", "rejected", or "uncertain"
-5. Provide a confidence score from 0 to 1
-6. Give specific feedback on what meets requirements and what doesn't
-
-Respond with JSON in this exact format:
-{
-  "status": "approved|rejected|uncertain",
-  "confidence": 0.XX,
-  "feedback": {
-    "strengths": ["list of things that meet requirements"],
-    "issues": ["list of discrepancies or missing items"],
-    "suggestions": ["suggestions for improvement if any"]
-  },
-  "requirementsSatisfied": true|false,
-  "recommendedAction": "approve|reject|manual-review"
-}
-`;
-
-    // Call Gemini API with text and images
-    let parts = [prompt];
-    if (imageAttachments.length > 0) {
-      parts = [prompt, ...imageAttachments];
-    }
-
-    const result = await model.generateContent(parts);
-    const response = result.response;
-    const text = response.text();
-
-    // Extract JSON from response
-    try {
-      // Try to find JSON in the response
-      const jsonStart = text.indexOf("{");
-      const jsonEnd = text.lastIndexOf("}");
-
-      if (jsonStart >= 0 && jsonEnd >= 0) {
-        const jsonString = text.substring(jsonStart, jsonEnd + 1);
-        const verificationResult = JSON.parse(jsonString);
-
-        return {
-          status: verificationResult.status,
-          confidence: verificationResult.confidence,
-          feedback: verificationResult.feedback,
-          requirementsSatisfied: verificationResult.requirementsSatisfied,
-          recommendedAction: verificationResult.recommendedAction,
-        };
-      }
-    } catch (err) {
-      logger.error(`Error parsing AI response: ${err.message}`);
-    }
-
-    // Default response if parsing fails
-    return {
-      status: "uncertain",
-      confidence: 0.5,
-      feedback: {
-        strengths: [],
-        issues: ["Could not analyze submission properly"],
-        suggestions: ["Please perform manual review"],
-      },
-      requirementsSatisfied: false,
-      recommendedAction: "manual-review",
-    };
-  } catch (error) {
-    logger.error(`Gemini API error: ${error.message}`);
-    // Default to uncertain on API failure
-    return {
-      status: "uncertain",
-      confidence: 0,
-      feedback: {
-        strengths: [],
-        issues: ["AI verification service encountered an error"],
-        suggestions: ["Please wait for manual review"],
-      },
-      requirementsSatisfied: false,
-      recommendedAction: "manual-review",
-    };
+Attached Files: ${
+    submission.attachments.map((a) => a.name).join(", ") || "None"
   }
+
+Based on the above information, please evaluate if the submission meets the requirements:
+1. Does the submission address all required deliverables? 
+2. Is the submission of professional quality?
+3. Does the submission match the milestone description?
+
+Please format your response exactly as follows:
+
+RESULT: [approved/rejected/uncertain]
+CONFIDENCE: [0-100]
+
+STRENGTHS:
+- [strength 1]
+- [strength 2]
+...
+
+ISSUES:
+- [issue 1]
+- [issue 2]
+...
+
+SUGGESTIONS:
+- [suggestion 1]
+- [suggestion 2]
+...
+
+ANALYSIS:
+[Your detailed analysis here]
+`;
 }
 
 /**
- * Prepare image files for Gemini API
+ * Parse the AI response into a structured object
+ * @param {string} response - The AI response text
+ * @returns {object} - The parsed result
  */
-async function prepareImageFiles(attachments) {
-  const imageAttachments = [];
+function parseAIResponse(response) {
+  try {
+    const result = {};
 
-  for (const attachment of attachments) {
-    // Only process image files
-    if (attachment.type && attachment.type.startsWith("image/")) {
-      try {
-        // If we have the file locally
-        const filePath = path.join(process.cwd(), "public", attachment.url);
+    // Extract result (approved/rejected/uncertain)
+    const resultMatch = response.match(/RESULT:\s*(\w+)/i);
+    result.result = resultMatch ? resultMatch[1].toLowerCase() : "uncertain";
 
-        if (fs.existsSync(filePath)) {
-          const fileData = fs.readFileSync(filePath);
-          const base64Data = fileData.toString("base64");
+    // Extract confidence (0-100)
+    const confidenceMatch = response.match(/CONFIDENCE:\s*(\d+)/i);
+    result.confidence = confidenceMatch ? parseInt(confidenceMatch[1]) : 50;
 
-          imageAttachments.push({
-            inlineData: {
-              data: base64Data,
-              mimeType: attachment.type,
-            },
-          });
-        } else if (attachment.url.startsWith("http")) {
-          // If it's an external URL
-          const response = await axios.get(attachment.url, {
-            responseType: "arraybuffer",
-          });
-          const fileData = Buffer.from(response.data, "binary").toString(
-            "base64"
-          );
-
-          imageAttachments.push({
-            inlineData: {
-              data: fileData,
-              mimeType: attachment.type,
-            },
-          });
-        }
-      } catch (error) {
-        logger.error(
-          `Error preparing image ${attachment.name}: ${error.message}`
+    // Extract strengths
+    result.strengths = [];
+    const strengthsSection = response.match(/STRENGTHS:([^]*?)(?:ISSUES:|$)/i);
+    if (strengthsSection) {
+      const strengths = strengthsSection[1].match(/(?:^|\n)-\s*([^\n]+)/g);
+      if (strengths) {
+        result.strengths = strengths.map((s) =>
+          s.replace(/(?:^|\n)-\s*/, "").trim()
         );
       }
     }
+
+    // Extract issues
+    result.issues = [];
+    const issuesSection = response.match(/ISSUES:([^]*?)(?:SUGGESTIONS:|$)/i);
+    if (issuesSection) {
+      const issues = issuesSection[1].match(/(?:^|\n)-\s*([^\n]+)/g);
+      if (issues) {
+        result.issues = issues.map((i) => i.replace(/(?:^|\n)-\s*/, "").trim());
+      }
+    }
+
+    // Extract suggestions
+    result.suggestions = [];
+    const suggestionsSection = response.match(
+      /SUGGESTIONS:([^]*?)(?:ANALYSIS:|$)/i
+    );
+    if (suggestionsSection) {
+      const suggestions = suggestionsSection[1].match(/(?:^|\n)-\s*([^\n]+)/g);
+      if (suggestions) {
+        result.suggestions = suggestions.map((s) =>
+          s.replace(/(?:^|\n)-\s*/, "").trim()
+        );
+      }
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error parsing AI response:", error);
+    return {
+      result: "uncertain",
+      confidence: 0,
+      strengths: [],
+      issues: ["Error parsing AI response"],
+      suggestions: ["Try again or escalate to manual review"],
+    };
+  }
+}
+
+/**
+ * Manually override AI verification result
+ * @param {string} submissionId - Submission ID
+ * @param {string} result - Result (approved/rejected)
+ * @param {string} notes - Admin notes
+ * @returns {Promise<object>} - Updated verification
+ */
+exports.manualVerificationOverride = async (submissionId, result, notes) => {
+  if (!["approved", "rejected"].includes(result)) {
+    throw new Error('Invalid result. Must be "approved" or "rejected"');
   }
 
-  return imageAttachments;
-}
+  const submission = await WorkSubmission.findById(submissionId);
+  if (!submission) {
+    throw new Error("Submission not found");
+  }
 
-/**
- * Handle automatic approval
- */
-async function handleAutoApproval(submission, milestone) {
-  logger.info(
-    `Auto-approving submission ${submission._id} for milestone ${milestone._id}`
-  );
+  // Update the AI verification with admin override
+  submission.aiVerification = {
+    ...submission.aiVerification,
+    result,
+    manualOverride: true,
+    manualOverrideNotes: notes,
+    verifiedAt: new Date(),
+  };
 
-  // Update submission status
-  await WorkSubmission.findByIdAndUpdate(submission._id, {
-    status: "approved",
-    reviewedAt: new Date(),
-    reviewNotes: "Automatically approved by AI verification",
-  });
-
-  // Update milestone status
-  await Milestone.findByIdAndUpdate(milestone._id, {
-    status: "completed",
-    completedAt: new Date(),
-  });
-
-  // Update project completed milestones count
-  await Project.findByIdAndUpdate(milestone.projectId._id, {
-    $inc: { completedMilestones: 1 },
-  });
-
-  // In a real app, you would notify users here
-}
-
-/**
- * Handle automatic rejection
- */
-async function handleAutoRejection(submission, milestone, feedback) {
-  logger.info(
-    `Auto-rejecting submission ${submission._id} for milestone ${milestone._id}`
-  );
-
-  // Update submission status
-  await WorkSubmission.findByIdAndUpdate(submission._id, {
-    status: "rejected",
-    reviewedAt: new Date(),
-    reviewNotes:
-      "Automatically rejected by AI verification. See feedback for details.",
-  });
-
-  // Keep milestone status as in-progress
-  await Milestone.findByIdAndUpdate(milestone._id, {
-    status: "in-progress",
-  });
-
-  // In a real app, you would notify users here
-}
-
-/**
- * Escalate to manual review
- */
-async function escalateToManualReview(
-  submission,
-  milestone,
-  verificationResult
-) {
-  logger.info(`Escalating submission ${submission._id} for manual review`);
-
-  // Leave submission status as pending
-  await WorkSubmission.findByIdAndUpdate(submission._id, {
-    $set: {
-      "aiVerification.escalatedToManual": true,
-    },
-  });
-
-  // Keep milestone as under-review
-  // No change needed to milestone status
-
-  // In a real app, you would notify users here
-}
+  await submission.save();
+  return submission.aiVerification;
+};
