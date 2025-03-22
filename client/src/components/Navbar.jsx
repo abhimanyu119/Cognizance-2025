@@ -2,18 +2,20 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Avatar from "./Avatar";
 import { BellIcon, MessageSquareIcon, MenuIcon, XIcon } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const location = useLocation();
+  const { isLoggedIn } = useAuth();
+  
   
   // Auth state would come from your AuthContext in a real app
-  const isLoggedIn = false;
   const userData = {
     id: 1,
-    username: "Kaushal",
-    role: "Employer", // or "Freelancer"
+    name: "Kaushal",
+    role: "Freelancer", // or "Freelancer"
     avatar: "",
     unreadMessages: 3,
     unreadNotifications: 5
@@ -25,31 +27,27 @@ export default function Navbar() {
 
   // Dynamic navbar links based on auth status and user role
   const getNavLinks = () => {
+
     // Links for non-authenticated users
     if (!isLoggedIn) {
       return [
-        { to: "/browse-jobs", label: "Browse Jobs" },
-        { to: "/browse-freelancers", label: "Browse Freelancers" },
         { to: "/how-it-works", label: "How it Works" }
       ];
     }
     
-    // Links for authenticated Employers
+    //Employers
     if (userData.role === "Employer") {
       return [
-        { to: "/dashboard", label: "Dashboard" },
-        { to: "/post-job", label: "Post a Job" },
-        { to: "/my-projects", label: "My Projects" },
-        { to: "/browse-freelancers", label: "Browse Freelancers" }
+        { to: "/browse-freelancers", label: "Browse Freelancers" },
+        { to: "/post-job", label: "Post a job" },
+        { to: "/how-it-works", label: "How it Works" }
       ];
     }
     
-    // Links for authenticated Freelancers
+    //Freelancers
     return [
-      { to: "/dashboard", label: "Dashboard" },
       { to: "/browse-jobs", label: "Browse Jobs" },
-      { to: "/my-applications", label: "My Applications" },
-      { to: "/active-projects", label: "Active Projects" }
+      { to: "/how-it-works", label: "How it Works" }
     ];
   };
 
@@ -82,14 +80,14 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center">
+          <div className="flex-shrink-0 flex items-center mr-5">
             <Link to="/" className="text-xl font-bold text-blue-600">
               SkillBridge
             </Link>
           </div>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-8">
+          <div className="hidden md:flex md:items-center justify-between w-full md:space-x-8">
             {/* Main Navigation Links */}
             <div className="flex space-x-6">
               {getNavLinks().map((link, index) => (
@@ -146,11 +144,11 @@ export default function Navbar() {
                   <div className="relative">
                     <button 
                       onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                      className="flex items-center space-x-2 focus:outline-none"
+                      className="flex items-center space-x-2 focus:outline-none cursor-pointer"
                     >
                       <span className="text-sm font-medium">{userData.username}</span>
-                      <div className="w-8 h-8">
-                        <Avatar avatar_url={userData.avatar} username={userData.username} />
+                      <div className="w-9 h-9">
+                        <Avatar avatar_url={userData.avatar} username={userData.name} />
                       </div>
                     </button>
                     

@@ -5,28 +5,52 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContext"; 
 import { UserProvider } from "./contexts/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Loader from "./components/Loader";
+import { ToastContainer } from 'react-toastify';
 import { useAuth } from "./contexts/AuthContext";
+import  Layout from "./components/Layout";
 
 // Dummy auth check
-const isAuthenticated = () => localStorage.getItem("token");
+const isLoggedIn = () => localStorage.getItem("token");
+
+
 
 
 export default function App() {
   return (
-    <Router>
-      <AuthProvider>
+    <>
+    <ToastContainer 
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        toastStyle={{
+          background: "#1E293B",
+          color: "#F8FAFC",
+          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.4)",
+          borderRadius: "12px",
+          border: "1px solid rgba(255, 255, 255, 0.05)"
+        }}
+      />
+    <AuthProvider>
       <UserProvider>
+        <Router>
 
       <Routes>
         
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        <Route element={<Navbar />}>
+        <Route element={<Layout />}>
           <Route path="/" element={<Landing />} />
           <Route element={<ProtectedRoute/>}>
             <Route path="/home" element={<Home />} />
@@ -35,9 +59,10 @@ export default function App() {
         </Route>
       
       </Routes>
+    </Router>
       </UserProvider>
     </AuthProvider>
-
-    </Router>
+    <ToastContainer />
+    </>
   );
 }
