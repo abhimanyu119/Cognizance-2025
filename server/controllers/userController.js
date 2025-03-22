@@ -5,7 +5,7 @@ const asyncHandler = require("../middleware/asyncHandler");
 const ErrorResponse = require("../utils/errorResponse");
 const fs = require("fs");
 const path = require("path");
-
+const Review = require("../models/Review");
 /**
  * @desc    Get current logged in user
  * @route   GET /api/users/me
@@ -66,20 +66,23 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
   const { currentPassword, newPassword } = req.body;
 
   if (!currentPassword || !newPassword) {
-    return next(
-      new ErrorResponse("Please provide current and new password", 400)
-    );
+    return next(new ErrorResponse("Please provide current and new password", 400));
   }
 
-  const user = await User.findById(req.user.id);
+  // Find user by ID and make sure password field is included
+  const user = await User.findById(req.user.id).select("+password");
 
-  // Check current password
+  if (!user) {
+    return next(new ErrorResponse("User not found", 404));
+  }
+
+  // Check if the current password matches
   const isMatch = await user.matchPassword(currentPassword);
-
   if (!isMatch) {
     return next(new ErrorResponse("Current password is incorrect", 401));
   }
 
+  // Update password and save
   user.password = newPassword;
   await user.save();
 
@@ -88,6 +91,7 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
     message: "Password updated successfully",
   });
 });
+
 
 /**
  * @desc    Upload user avatar
@@ -155,7 +159,7 @@ exports.uploadAvatar = asyncHandler(async (req, res, next) => {
  * @access  Public
  */
 exports.getFreelancers = asyncHandler(async (req, res, next) => {
-  res.status(200).json(res.advancedResults);
+  res.status(200).json(res.advancedResults);  
 });
 
 /**
@@ -173,7 +177,7 @@ exports.getEmployers = asyncHandler(async (req, res, next) => {
  * @access  Public
  */
 exports.getPublicProfile = asyncHandler(async (req, res, next) => {
-  const user = await User.findOne({ username: req.params.username })
+  const user = await User.findById(req.params.userId)
     .select("-password")
     .populate("skills");
 
@@ -193,8 +197,19 @@ exports.getPublicProfile = asyncHandler(async (req, res, next) => {
  * @access  Public
  */
 exports.getUserPortfolio = asyncHandler(async (req, res, next) => {
-  const portfolio = await Portfolio.find({ user: req.params.userId });
-
+  let userId = req.params.userId;
+  
+  // Handle the special case when userId is "me"
+  if (userId === "me") {
+    // Check if user is authenticated
+    if (!req.user || !req.user.id) {
+      return next(new ErrorResponse('Authentication required to access your portfolio', 401));
+    }
+    userId = req.user.id;
+  }
+  
+  const portfolio = await Portfolio.find({ user: userId });
+  
   res.status(200).json({
     success: true,
     count: portfolio.length,
@@ -208,10 +223,15 @@ exports.getUserPortfolio = asyncHandler(async (req, res, next) => {
  * @access  Private
  */
 exports.addPortfolioItem = asyncHandler(async (req, res, next) => {
+  // Make sure req.user exists and has valid id
+  if (!req.user || !req.user.id) {
+    return next(new ErrorResponse('User authentication required', 401));
+  }
+  
   req.body.user = req.user.id;
-
+  
   const portfolio = await Portfolio.create(req.body);
-
+  
   res.status(201).json({
     success: true,
     data: portfolio,
@@ -267,14 +287,17 @@ exports.deletePortfolioItem = asyncHandler(async (req, res, next) => {
     );
   }
 
-  await portfolio.remove();
+  // Use deleteOne() instead of remove()
+  await portfolio.deleteOne();
+  
+  // Alternatively, you could use this method directly:
+  // await Portfolio.findByIdAndDelete(req.params.itemId);
 
   res.status(200).json({
     success: true,
     data: {},
   });
 });
-
 /**
  * @desc    Get user skills
  * @route   GET /api/users/:userId/skills
@@ -335,9 +358,16 @@ exports.addSkill = asyncHandler(async (req, res, next) => {
  */
 exports.removeSkill = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
+  
+  if (!user) {
+    return next(new ErrorResponse("User not found", 404));
+  }
 
+  // Convert ObjectIds to strings for comparison
+  const userSkillIds = user.skills.map(skill => skill.toString());
+  
   // Check if user has the skill
-  if (!user.skills.includes(req.params.skillId)) {
+  if (!userSkillIds.includes(req.params.skillId)) {
     return next(new ErrorResponse("Skill not found in user profile", 404));
   }
 
@@ -385,27 +415,46 @@ exports.getUserReviews = asyncHandler(async (req, res, next) => {
 exports.saveUser = asyncHandler(async (req, res, next) => {
   // Make sure user exists
   const userToSave = await User.findById(req.params.userId);
-
   if (!userToSave) {
     return next(new ErrorResponse("User not found", 404));
   }
 
   // Check if already saved
   const user = await User.findById(req.user.id);
+  
+  if (!user) {
+    return next(new ErrorResponse("Authentication error", 401));
+  }
+  
+  // Initialize savedUsers array if it doesn't exist
+  if (!user.savedUsers) {
+    user.savedUsers = [];
+  }
 
-  if (user.savedUsers.includes(req.params.userId)) {
+  // Check if already saved - Convert ObjectIDs to strings for proper comparison
+  const isAlreadySaved = user.savedUsers.some(
+    (userId) => userId.toString() === req.params.userId
+  );
+  
+  if (isAlreadySaved) {
     return next(new ErrorResponse("User already saved", 400));
   }
 
   user.savedUsers.push(req.params.userId);
   await user.save();
 
+  // Return the saved users with populated data for better client usage
+  const savedUsers = await User.find(
+    { _id: { $in: user.savedUsers } },
+    'name username avatar bio title role'
+  );
+
   res.status(200).json({
     success: true,
-    data: {},
+    count: savedUsers.length,
+    data: savedUsers
   });
 });
-
 /**
  * @desc    Unsave a user
  * @route   DELETE /api/users/save/:userId
@@ -413,12 +462,30 @@ exports.saveUser = asyncHandler(async (req, res, next) => {
  */
 exports.unsaveUser = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
-
-  // Check if saved
-  if (!user.savedUsers.includes(req.params.userId)) {
-    return next(new ErrorResponse("User not saved", 400));
+  
+  if (!user) {
+    return next(new ErrorResponse("Authentication error", 401));
+  }
+  
+  // Check if savedUsers exists and has items
+  if (!user.savedUsers || user.savedUsers.length === 0) {
+    return next(new ErrorResponse("No saved users found", 400));
   }
 
+  // Debug logging to help identify the issue
+  console.log("User ID to unsave:", req.params.userId);
+  console.log("Saved user IDs:", user.savedUsers.map(id => id.toString()));
+  
+  // Check if the user is in the saved list
+  const isUserSaved = user.savedUsers.some(
+    (id) => id.toString() === req.params.userId
+  );
+  
+  if (!isUserSaved) {
+    return next(new ErrorResponse("User not found in saved list", 404));
+  }
+
+  // Remove the user from savedUsers
   user.savedUsers = user.savedUsers.filter(
     (id) => id.toString() !== req.params.userId
   );
@@ -427,24 +494,39 @@ exports.unsaveUser = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: {},
+    message: "User removed from saved list",
+    // Return updated list for client convenience
+    data: await User.find(
+      { _id: { $in: user.savedUsers } },
+      'name username avatar bio title role'
+    )
   });
 });
-
 /**
  * @desc    Get saved users
  * @route   GET /api/users/me/saved
  * @access  Private
  */
 exports.getSavedUsers = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user.id).populate({
-    path: "savedUsers",
-    select: "name username avatar bio title role",
-  });
+  const user = await User.findById(req.user.id);
+  
+  if (!user || !user.savedUsers) {
+    return res.status(200).json({
+      success: true,
+      count: 0,
+      data: []
+    });
+  }
+  
+  // Fetch saved users separately since we can't populate
+  const savedUsers = await User.find(
+    { _id: { $in: user.savedUsers } },
+    'name username avatar bio title role'
+  );
 
   res.status(200).json({
     success: true,
-    count: user.savedUsers.length,
-    data: user.savedUsers,
+    count: savedUsers.length,
+    data: savedUsers
   });
 });
