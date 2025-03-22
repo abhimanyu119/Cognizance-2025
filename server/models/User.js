@@ -42,6 +42,15 @@ const UserSchema = new mongoose.Schema(
         twitter: String,
       },
     },
+    ethWalletAddress: {
+      type: String,
+      validate: {
+        validator: function (v) {
+          return !v || /^0x[a-fA-F0-9]{40}$/.test(v);
+        },
+        message: (props) => `${props.value} is not a valid Ethereum address`,
+      },
+    },
     skills: [String],
     rating: {
       average: {
@@ -61,11 +70,7 @@ const UserSchema = new mongoose.Schema(
         link: String,
       },
     ],
-    payment_methods: {
-      stripeCustomerId: String,
-      stripeAccountId: String,
-      defaultPaymentMethod: String,
-    },
+
     wallet: {
       balance: {
         type: Number,
@@ -79,11 +84,6 @@ const UserSchema = new mongoose.Schema(
         type: String,
         default: "USD",
       },
-    },
-    accountStatus: {
-      type: String,
-      enum: ["active", "inactive", "suspended"],
-      default: "active",
     },
     twoFactorEnabled: {
       type: Boolean,
