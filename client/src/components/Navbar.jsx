@@ -56,7 +56,7 @@ export default function Navbar() {
   // Profile dropdown menu items
   const getProfileMenuItems = () => {
     const commonItems = [
-      { to: `/profile/${user.username}`, label: "My Profile" },
+      { to: `/profile/${user.name}`, label: "My Profile" },
       { to: "/settings", label: "Settings" },
       { to: "/logout", label: "Logout" }
     ];
