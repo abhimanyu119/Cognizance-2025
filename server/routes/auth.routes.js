@@ -9,7 +9,6 @@ const {
 const auth = require("../middleware/auth");
 
 const router = express.Router();
-
 router.post("/register", register);
 router.post("/google-signup", googleSignUp);
 router.post("/login", login);
