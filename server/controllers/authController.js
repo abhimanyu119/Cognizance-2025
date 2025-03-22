@@ -1,4 +1,7 @@
 const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const logger = require("../config/logger");
 
 // @desc    Register user
@@ -19,6 +22,110 @@ exports.register = async (req, res, next) => {
     sendTokenResponse(user, 201, res);
   } catch (err) {
     next(err);
+  }
+};
+
+/**
+ * @desc    Authenticate user/signup with Google OAuth
+ * @route   POST /api/auth/google-signup
+ * @access  Public
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ * 
+ * @returns {Object} - JSON response with user info and JWT token
+ */
+exports.googleSignUp = async (req, res) => {
+  try {
+    const { name, email, googleId, picture, role } = req.body;
+
+    // Validate input
+    if (!name || !email || !googleId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields'
+      });
+    }
+
+    // Validate role if provided
+    if (role && !['freelancer', 'employer'].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid role'
+      });
+    }
+
+    // Check if user already exists
+    let user = await User.findOne({ 
+      $or: [
+        { email },
+        { googleId }
+      ]
+    });
+
+    // If user doesn't exist, create new user
+    if (!user) {
+      // Generate a random password as a fallback
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(googleId, salt);
+
+      user = new User({
+        name,
+        email,
+        password: hashedPassword,
+        googleId,
+        profileImage: picture,
+        role: role || 'freelancer', // Default to freelancer if no role provided
+        isGoogleUser: true
+      });
+
+      await user.save();
+    } else {
+      // Update existing user's information if needed
+      if (!user.googleId) {
+        user.googleId = googleId;
+      }
+      if (picture && !user.profileImage) {
+        user.profileImage = picture;
+      }
+      if (role && !user.role) {
+        user.role = role;
+      }
+      await user.save();
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        id: user._id, 
+        email: user.email, 
+        role: user.role 
+      }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: process.env.JWT_EXPIRE }
+    );
+
+    // Respond with user info and token
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        profileImage: user.profileImage
+      }
+    });
+
+  } catch (error) {
+    console.error('Google Signup Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during Google signup',
+      error: error.message
+    });
   }
 };
 
