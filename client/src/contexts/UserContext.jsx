@@ -66,7 +66,7 @@ export const UserProvider = ({ children }) => {
     isEmployer: user?.role === 'Employer',
     isFreelancer: user?.role === 'Freelancer'
   };
-  if (!user) {
+  if (!user&&loading) {
     return (
       <div className="flex justify-center items-center h-screen text-xl text-gray-600">
         Loading user data...
