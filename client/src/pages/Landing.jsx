@@ -1,9 +1,31 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import sarah from '../assets/images/sarah.jpeg';
+import miguel from '../assets/images/miguel.png';
 
 export default function Landing() {
+  // Initialize AOS animation library
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out',
+      once: false,
+      mirror: false,
+      offset: 120
+    });
+    
+    // Refresh AOS when components fully load
+    window.addEventListener('load', AOS.refresh);
+    
+    return () => {
+      window.removeEventListener('load', AOS.refresh);
+    };
+  }, []);
+
   // Toast notification functions
   const showSuccessToast = () => toast.success("Sign up successful! Welcome to PayCraft!");
   const showTrialToast = () => toast.info("Your 14-day trial has started!");
@@ -18,7 +40,7 @@ export default function Landing() {
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </Helmet>
       
-     <nav>
+      <nav data-aos="fade-down" data-aos-delay="100">
         <div className="logo">Pay<span>Craft</span></div>
         <div className="nav-links">
           <a href="#features">Features</a>
@@ -30,23 +52,25 @@ export default function Landing() {
       </nav>
       
       <section className="hero">
-        <div className="hero-content">
-          <h1>Fair Payments for Web Developers</h1>
+        <div className="hero-content" data-aos="fade-right" data-aos-delay="200">
+          <h1>Empowering Freelancers, Ensuring Fair Payments</h1>
+          
+          
           <p>PayCraft provides transparent, timely payments with comprehensive project tracking. Say goodbye to payment delays and hello to fair compensation for your work.</p>
           <button className="cta-button" onClick={showSuccessToast}>Get Started Free</button>
         </div>
         <div className="hero-img">
-          <div className="payment-card">
+          <div className="payment-card" data-aos="fade-up" data-aos-delay="400">
             <h4>Website Development</h4>
             <div className="payment-amount">0.8 ETH</div>
             <span className="payment-status">Paid on time</span>
           </div>
-          <div className="payment-card">
+          <div className="payment-card" data-aos="fade-up" data-aos-delay="600">
             <h4>E-commerce Platform</h4>
             <div className="payment-amount">1.5 ETH</div>
             <span className="payment-status">In escrow</span>
           </div>
-          <div className="payment-card">
+          <div className="payment-card" data-aos="fade-up" data-aos-delay="800">
             <h4>Mobile App UI</h4>
             <div className="payment-amount">0.9 ETH</div>
             <span className="payment-status">Payment due</span>
@@ -55,13 +79,13 @@ export default function Landing() {
       </section>
       
       <section className="features" id="features">
-        <div className="section-title">
+        <div className="section-title" data-aos="fade-up">
           <h2>Why Choose PayCraft?</h2>
           <p>Our platform is designed with freelance web developers in mind, ensuring you get paid fairly for every line of code.</p>
         </div>
         
         <div className="feature-grid">
-          <div className="feature-card">
+          <div className="feature-card" data-aos="zoom-in-up" data-aos-delay="100">
             <div className="feature-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm1-8h4v2h-6V7h2v5z"/></svg>
             </div>
@@ -69,7 +93,7 @@ export default function Landing() {
             <p>Get paid on schedule with automated reminders and payment processing. No more chasing clients for overdue invoices.</p>
           </div>
           
-          <div className="feature-card">
+          <div className="feature-card" data-aos="zoom-in-up" data-aos-delay="200">
             <div className="feature-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-11v6h2v-6h-2zm0-4v2h2V7h-2z"/></svg>
             </div>
@@ -77,7 +101,7 @@ export default function Landing() {
             <p>View detailed breakdowns of project costs, hours tracked, and payment status at every stage of your project.</p>
           </div>
           
-          <div className="feature-card">
+          <div className="feature-card" data-aos="zoom-in-up" data-aos-delay="300">
             <div className="feature-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 16.938V19h5v2H6v-2h5v-2.062A8.001 8.001 0 0 1 4 9V3h16v6a8.001 8.001 0 0 1-7 7.938zM6 5v4a6 6 0 1 0 12 0V5H6zM1 5h2v4H1V5zm20 0h2v4h-2V5z"/></svg>
             </div>
@@ -85,7 +109,7 @@ export default function Landing() {
             <p>Our unbiased mediation process ensures both parties are heard and disputes are resolved fairly and quickly.</p>
           </div>
           
-          <div className="feature-card">
+          <div className="feature-card" data-aos="zoom-in-up" data-aos-delay="400">
             <div className="feature-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 8H4v8h16v-8zm0-2V5H4v4h16zm-5 4h4v2h-4v-2z"/></svg>
             </div>
@@ -93,7 +117,7 @@ export default function Landing() {
             <p>Choose from various payment methods including bank transfers, PayPal, Stripe, and even cryptocurrency options.</p>
           </div>
           
-          <div className="feature-card">
+          <div className="feature-card" data-aos="zoom-in-up" data-aos-delay="500">
             <div className="feature-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.083 15.2l1.202.721a.5.5 0 0 1 0 .858l-8.77 5.262a1 1 0 0 1-1.03 0l-8.77-5.262a.5.5 0 0 1 0-.858l1.202-.721L12 20.05l8.083-4.85zm0-4.7l1.202.721a.5.5 0 0 1 0 .858L12 17.65l-9.285-5.571a.5.5 0 0 1 0-.858l1.202-.721L12 15.35l8.083-4.85zm-7.569-9.191l8.771 5.262a.5.5 0 0 1 0 .858L12 13 2.715 7.429a.5.5 0 0 1 0-.858l8.77-5.262a1 1 0 0 1 1.03 0zM12 3.332L5.887 7 12 10.668 18.113 7 12 3.332z"/></svg>
             </div>
@@ -101,7 +125,7 @@ export default function Landing() {
             <p>Break projects into clear milestones with associated payments to ensure smooth project progression and fair compensation.</p>
           </div>
           
-          <div className="feature-card">
+          <div className="feature-card" data-aos="zoom-in-up" data-aos-delay="600">
             <div className="feature-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 3v16h16v2H3V3h2zm15.293 3.293l1.414 1.414L16 13.414l-3-2.999-4.293 4.292-1.414-1.414L13 7.586l3 2.999 4.293-4.292z"/></svg>
             </div>
@@ -112,13 +136,13 @@ export default function Landing() {
       </section>
       
       <section className="how-it-works" id="how-it-works">
-        <div className="section-title">
+        <div className="section-title" data-aos="fade-up">
           <h2>How PayCraft Works</h2>
           <p>Our simple, four-step process ensures you get paid fairly for every project.</p>
         </div>
         
         <div className="steps-container">
-          <div className="step">
+          <div className="step" data-aos="fade-right" data-aos-delay="100">
             <div className="step-number">1</div>
             <div className="step-content">
               <h3>Create Your Project</h3>
@@ -126,7 +150,7 @@ export default function Landing() {
             </div>
           </div>
           
-          <div className="step">
+          <div className="step" data-aos="fade-right" data-aos-delay="300">
             <div className="step-number">2</div>
             <div className="step-content">
               <h3>Client Funds Escrow</h3>
@@ -134,7 +158,7 @@ export default function Landing() {
             </div>
           </div>
           
-          <div className="step">
+          <div className="step" data-aos="fade-right" data-aos-delay="500">
             <div className="step-number">3</div>
             <div className="step-content">
               <h3>Track Progress & Time</h3>
@@ -142,7 +166,7 @@ export default function Landing() {
             </div>
           </div>
           
-          <div className="step">
+          <div className="step" data-aos="fade-right" data-aos-delay="700">
             <div className="step-number">4</div>
             <div className="step-content">
               <h3>Get Paid Automatically</h3>
@@ -151,21 +175,73 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      <section className="who-is-for py-16 bg-[#0F172A]" id="who-is-for">
+  <div className="container mx-auto text-center">
+    
+    {/* Section Title */}
+    <div className="section-title mb-8" data-aos="fade-up">
+      <h2 className="text-3xl font-bold text-white">Who Is This For?</h2>
+    </div>
+
+    {/* Content Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 who-is-for-content">
+
+      {/* Freelancer Card */}
+      <div className="feature-card bg-[#1E293B] p-6 shadow-lg rounded-lg text-center" 
+           data-aos="zoom-in-up" data-aos-delay="100">
+        <div className="feature-icon mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-12 h-12 text-blue-400 mx-auto">
+            <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm1-8h4v2h-6V7h2v5z"/>
+          </svg>
+        </div>
+        <strong className="text-lg text-white">Freelancers</strong>
+        <p className="text-gray-300 mt-2">Say goodbye to unpaid invoices.</p>
+      </div>
+
+      {/* Client Card */}
+      <div className="feature-card bg-[#1E293B] p-6 shadow-lg rounded-lg text-center" 
+           data-aos="zoom-in-up" data-aos-delay="300">
+        <div className="feature-icon mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-12 h-12 text-green-400 mx-auto">
+            <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm1-8h4v2h-6V7h2v5z"/>
+          </svg>
+        </div>
+        <strong className="text-lg text-white">Clients</strong>
+        <p className="text-gray-300 mt-2">Hire with confidence, knowing your money is protected.</p>
+      </div>
+
+      {/* Agencies & Teams Card */}
+      <div className="feature-card bg-[#1E293B] p-6 shadow-lg rounded-lg text-center" 
+           data-aos="zoom-in-up" data-aos-delay="500">
+        <div className="feature-icon mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-12 h-12 text-purple-400 mx-auto">
+            <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm1-8h4v2h-6V7h2v5z"/>
+          </svg>
+        </div>
+        <strong className="text-lg text-white">Agencies & Teams</strong>
+        <p className="text-gray-300 mt-2">Scale effortlessly with automated payment flows.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
       
       <section className="testimonials" id="testimonials">
-        <div className="section-title">
+        <div className="section-title" data-aos="fade-up">
           <h2>Developers Love Us</h2>
           <p>Don't just take our word for it. Here's what freelance web developers are saying about PayCraft.</p>
         </div>
         
         <div className="testimonial-grid">
-          <div className="testimonial-card">
+          <div className="testimonial-card" data-aos="flip-left" data-aos-delay="100">
             <div className="testimonial-text">
               "After years of chasing payments and dealing with unclear project scopes, PayCraft has completely transformed my freelance business. I now get paid on time, every time."
             </div>
             <div className="testimonial-author">
               <div className="author-avatar">
-                <img src="/api/placeholder/50/50" alt="Developer portrait" />
+                <img src={sarah} alt="Developer portrait" />
               </div>
               <div>
                 <div className="author-name">Sarah Johnson</div>
@@ -174,13 +250,13 @@ export default function Landing() {
             </div>
           </div>
           
-          <div className="testimonial-card">
+          <div className="testimonial-card" data-aos="flip-left" data-aos-delay="300">
             <div className="testimonial-text">
               "The milestone feature is a game-changer. Breaking down projects into manageable chunks with associated payments has improved both my cash flow and client relationships."
             </div>
             <div className="testimonial-author">
               <div className="author-avatar">
-                <img src="/api/placeholder/50/50" alt="Developer portrait" />
+                <img src="https://mediaassets.cbre.com/cdn/-/media/project/cbre/shared-site/headshots/a/l/e/alex-chen.jpg?rev=c074d60b5f3b4ec2bd02785b7d2f30a6&hash=0d3e560e170e011afca49ed68e78d01f&key=personhero-default&device=desktop" alt="Developer portrait" />
               </div>
               <div>
                 <div className="author-name">Alex Chen</div>
@@ -189,13 +265,13 @@ export default function Landing() {
             </div>
           </div>
           
-          <div className="testimonial-card">
+          <div className="testimonial-card" data-aos="flip-left" data-aos-delay="500">
             <div className="testimonial-text">
               "I had a dispute with a client that could have ended badly, but PayCraft's mediation service resolved it fairly. The transparency tools also prevent most issues before they start."
             </div>
             <div className="testimonial-author">
               <div className="author-avatar">
-                <img src="/api/placeholder/50/50" alt="Developer portrait" />
+                <img src={miguel} alt="Developer portrait" />
               </div>
               <div>
                 <div className="author-name">Miguel Santos</div>
@@ -207,13 +283,13 @@ export default function Landing() {
       </section>
       
       <section className="pricing" id="pricing">
-        <div className="section-title">
+        <div className="section-title" data-aos="fade-up">
           <h2>Simple, Transparent Pricing</h2>
           <p>Choose the plan that fits your freelance business needs. No hidden fees, ever.</p>
         </div>
         
         <div className="pricing-grid">
-          <div className="pricing-card">
+          <div className="pricing-card" data-aos="fade-up" data-aos-delay="100">
             <h3 className="pricing-name">Starter</h3>
             <div className="pricing-price">$0<small>/month</small></div>
             <ul className="pricing-features">
@@ -226,7 +302,7 @@ export default function Landing() {
             <button className="cta-button" onClick={showSuccessToast}>Sign Up Free</button>
           </div>
           
-          <div className="pricing-card featured">
+          <div className="pricing-card featured" data-aos="fade-up" data-aos-delay="300">
             <h3 className="pricing-name">Professional</h3>
             <div className="pricing-price">$19<small>/month</small></div>
             <ul className="pricing-features">
@@ -240,7 +316,7 @@ export default function Landing() {
             <button className="cta-button" onClick={showTrialToast}>Start 14-Day Trial</button>
           </div>
           
-          <div className="pricing-card">
+          <div className="pricing-card" data-aos="fade-up" data-aos-delay="500">
             <h3 className="pricing-name">Agency</h3>
             <div className="pricing-price">$49<small>/month</small></div>
             <ul className="pricing-features">
@@ -256,7 +332,7 @@ export default function Landing() {
         </div>
       </section>
       
-      <section className="cta">
+      <section className="cta" data-aos="zoom-in">
         <h2>Ready to Get Paid What You're Worth?</h2>
         <p>Join thousands of web developers who have transformed their freelance business with fair, transparent, and on-time payments.</p>
         <button className="cta-button-alt" onClick={showTrialToast}>Start Your Free Trial Today</button>
@@ -264,37 +340,30 @@ export default function Landing() {
       
       <footer>
         <div className="footer-grid">
-          <div className="footer-col">
+          <div className="footer-col" data-aos="fade-up" data-aos-delay="100">
             <h4>PayCraft</h4>
             <ul className="footer-links">
               <li><a href="#">About Us</a></li>
-              
               <li><a href="#">Blog</a></li>
-              
             </ul>
           </div>
           
-          <div className="footer-col">
+          <div className="footer-col" data-aos="fade-up" data-aos-delay="200">
             <h4>Features</h4>
             <ul className="footer-links">
               <li><a href="#">Payment Protection</a></li>
-              
-              
-              
             </ul>
           </div>
           
-          <div className="footer-col">
+          <div className="footer-col" data-aos="fade-up" data-aos-delay="300">
             <h4>Resources</h4>
             <ul className="footer-links">
               <li><a href="#">FAQ</a></li>
-              
               <li><a href="#">Freelancer Guide</a></li>
-              
             </ul>
           </div>
           
-          <div className="footer-col">
+          <div className="footer-col" data-aos="fade-up" data-aos-delay="400">
             <h4>Legal</h4>
             <ul className="footer-links">
               <li><a href="#">Terms of Service</a></li>
