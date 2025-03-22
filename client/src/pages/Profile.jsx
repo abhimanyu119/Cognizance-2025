@@ -1,9 +1,24 @@
-import React from 'react'
+import React from 'react';
+import { useUser } from '../contexts/UserContext';
+import EmployerProfile from './EmployerProfile';
+import FreelancerProfile from './FreelancerProfile';
 
 const Profile = () => {
-  return (
-    <div>Profile</div>
-  )
-}
+  const { user } = useUser();
 
-export default Profile
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <>
+      {user.role === 'employer' ? (
+        <EmployerProfile user={user} />
+      ) : (
+        <FreelancerProfile user={user} />
+      )}
+    </>
+  );
+};
+
+export default Profile;
