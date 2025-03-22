@@ -13,6 +13,9 @@ import Loader from "./components/Loader";
 import { ToastContainer } from 'react-toastify';
 import { useAuth } from "./contexts/AuthContext";
 import  Layout from "./components/Layout";
+import FindProjects from "./pages/FindProjects";
+import NotFound from "./pages/NotFound";
+
 
 // Dummy auth check
 const isLoggedIn = () => localStorage.getItem("token");
@@ -35,10 +38,11 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route element={<ProtectedRoute/>}>
             <Route path="/home" element={<Home />} />
+            <Route path="/find-projects" element={<FindProjects />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
         </Route>
-      
+        <Route path="*" element={<NotFound />} /> {/* 404 Route */}
       </Routes>
     </Router>
       </UserProvider>

@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import axiosInstance from '../utils/axiosInstance';
 
 const UserContext = createContext(null);
 
@@ -18,23 +19,11 @@ export const UserProvider = ({ children }) => {
 
       try {
         setLoading(true);
-        // In a real app, you would fetch user data from your API
-        // const response = await api.get('/users/me', {
-        //   headers: { Authorization: `Bearer ${token}` }
-        // });
-        // setUser(response.data);
+        
+        const response = await axiosInstance.get('api/auth/me');
+        console.log("response: ", response.data);
+        setUser(response.data);
 
-        // Mock user data for demonstration
-        setUser({
-          id: 1,
-          username: 'Kaushal',
-          email: 'kaushal@example.com',
-          role: 'Employer', // or 'Freelancer'
-          avatar: '',
-          unreadMessages: 3,
-          unreadNotifications: 5,
-          createdAt: new Date().toISOString()
-        });
       } catch (error) {
         console.error('Failed to fetch user data:', error);
         setUser(null);

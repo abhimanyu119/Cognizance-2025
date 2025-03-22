@@ -12,6 +12,7 @@ const app = express();
 const allowedOrigins = [process.env.FRONTEND_URL.trim()];
 
 app.use(helmet());
+
 app.use(
   cors({
     origin: allowedOrigins,
