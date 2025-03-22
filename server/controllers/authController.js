@@ -25,17 +25,10 @@ exports.register = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Authenticate user/signup with Google OAuth
- * @route   POST /api/auth/google-signup
- * @access  Public
- * 
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next middleware function
- * 
- * @returns {Object} - JSON response with user info and JWT token
- */
+
+// @desc    Authenticate user/signup with Google OAuth
+// @route   POST /api/auth/google-signup
+// @access  Public
 exports.googleSignUp = async (req, res) => {
   try {
     const { name, email, googleId, picture, role } = req.body;

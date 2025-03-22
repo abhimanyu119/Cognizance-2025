@@ -1,7 +1,7 @@
 const express = require("express");
 const {
   register,
-  googleSignup,
+  googleSignUp,
   login,
   getMe,
   logout,
