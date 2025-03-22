@@ -2,11 +2,17 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/auth");
 const userController = require("../controllers/userController");
+const User = require("../models/User");
+const advancedResults = require("../middleware/AdvancedResults");
 
 // Public routes
-router.get("/freelancers", userController.getFreelancers);
-router.get("/employers", userController.getEmployers);
-router.get("/profile/:username", userController.getPublicProfile);
+// For freelancers - pass null as populate param, and filter as third param
+router.get("/freelancers", advancedResults(User, null, { role: "freelancer" }), userController.getFreelancers);
+
+// For employers - pass null as populate param, and filter as third param
+router.get("/employers", advancedResults(User, null, { role: "employer" }), userController.getEmployers);
+
+router.get("/profile/:userId", userController.getPublicProfile);
 
 // Protected routes - Both roles
 router.get("/me", auth, userController.getCurrentUser);
