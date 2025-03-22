@@ -16,6 +16,7 @@ const Login = () => {
   } = useForm({
     mode: "onChange",
   });
+
   const { setIsLoggedIn } = useAuth();
 
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const Login = () => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const onSubmit = async (data) => {
+    
     try {
       const response = await axiosInstance.post("/api/auth/login", data, {showToast: true, toastMessage: "Successfully logged in!"});
       console.log(response.data);
@@ -33,10 +35,9 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(response.data.user));
       setIsLoggedIn(true);
       navigate("/home");
+
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Login failed. Please try again."
-      );
+      
       console.error(error);
     }
   };
