@@ -75,6 +75,7 @@ export default function Navbar() {
     ];
   };
 
+  if(!user) return <div className="w-10 h-10 rounded-full border-t border-blue-400 animate-spin"></div>;
   return (
     <nav className="sticky w-full top-0 z-50 bg-[#0F172A] shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
