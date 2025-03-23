@@ -13,9 +13,9 @@ const Profile = () => {
   return (
     <>
       {user.role === 'employer' ? (
-        <EmployerProfile user={user} />
+        <EmployerProfile user={user.EmployerProfile} />
       ) : (
-        <FreelancerProfile user={user} />
+        <FreelancerProfile user={user.FreelancerProfile} />
       )}
     </>
   );
