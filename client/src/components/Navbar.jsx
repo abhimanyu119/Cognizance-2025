@@ -45,7 +45,11 @@ export default function Navbar() {
 
     //Freelancers
     return [
-      { to: "/find-projects", label: "Find Projects" },
+    
+      { to: "/find-projects", label: "find projects" },
+      { to: "/active-projects", label: "Active projects" },
+
+      // { to: "/how-it-works", label: "How it Works" },
     ];
   };
 
@@ -153,12 +157,12 @@ export default function Navbar() {
                   <div className="relative">
                     <button
                       onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                      className="flex items-center space-x-2 focus:outline-none cursor-pointer"
+                      className="flex items-center space-x-2 focus:outline-none cursor-pointer group"
                     >
                       <span className="text-sm font-medium text-[#F8FAFC]">
                         {userData.username}
                       </span>
-                      <div className="w-9 h-9">
+                      <div className="w-9 h-9 ring-2 ring-[#3EDBD3]/50 rounded-full overflow-hidden">
                         <Avatar
                           avatar_url={userData.avatar}
                           username={userData.name}
@@ -170,8 +174,8 @@ export default function Navbar() {
                       <div className="absolute right-0 mt-2 w-48 bg-[#1E293B] rounded-md shadow-lg py-1 z-20 ring-1 ring-black ring-opacity-5">
                         <div className="px-4 py-2 text-xs text-[#94A3B8] border-b border-[#0B1120]">
                           Signed in as{" "}
-                          <span className="font-medium capitalize">
-                            {userData.role}
+                          <span className="font-medium capitalize text-[#3EDBD3]">
+                            {user.role}
                           </span>
                         </div>
                         {getProfileMenuItems().map((item, index) => (
@@ -262,7 +266,7 @@ export default function Navbar() {
               <>
                 <div className="flex items-center px-4">
                   <div className="flex-shrink-0">
-                    <div className="h-10 w-10">
+                    <div className="h-10 w-10 ring-2 ring-[#3EDBD3]/50 rounded-full overflow-hidden">
                       <Avatar
                         avatar_url={userData.avatar}
                         username={userData.username}
@@ -313,6 +317,17 @@ export default function Navbar() {
                       {item.label}
                     </Link>
                   ))}
+                  <button
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#FF6EC7] hover:bg-[#1E293B]"
+                    onClick={() => {
+                      localStorage.removeItem("token");
+                      localStorage.removeItem("user");
+                      setIsMenuOpen(false);
+                      navigate("/login");
+                    }}
+                  >
+                    Logout
+                  </button>
                 </div>
               </>
             )}
