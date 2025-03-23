@@ -1,6 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+// Note: You'll need to install framer-motion: npm install framer-motion
+import { motion, AnimatePresence } from 'framer-motion';
 
 const FindProjects = () => {
+  // State for loading animation
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Simulate loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   // State for filters
   const [searchTerm, setSearchTerm] = useState('');
   const [projectType, setProjectType] = useState('all');
@@ -28,7 +42,7 @@ const FindProjects = () => {
   const [viewMode, setViewMode] = useState('grid');
 
   // Mock project data
-  const projectsList = [
+  const [projectsList, setProjectsList] = useState([
     {
       id: 1,
       title: "React Native Developer for Mobile App",
@@ -85,7 +99,7 @@ const FindProjects = () => {
       clientRating: 4.7,
       saved: false
     }
-  ];
+  ]);
 
   // Handler for saving a project
   const toggleSaveProject = (id) => {
@@ -93,10 +107,20 @@ const FindProjects = () => {
     console.log(`Project ${id} save toggled`);
   };
 
+  // State for active project animation
+  const [activeProjectId, setActiveProjectId] = useState(null);
+
   // Handler for applying to a project
   const applyToProject = (id) => {
-    // In a real app, this would navigate to application page or open modal
-    console.log(`Applying to project ${id}`);
+    // Set active project for animation
+    setActiveProjectId(id);
+    
+    // Reset after animation
+    setTimeout(() => {
+      setActiveProjectId(null);
+      // In a real app, this would navigate to application page or open modal
+      console.log(`Applying to project ${id}`);
+    }, 500);
   };
 
   // Handler for resetting filters
@@ -125,15 +149,83 @@ const FindProjects = () => {
     });
   };
 
-  return (
-    <div className="bg-[#0F172A] min-h-screen text-[#F8FAFC]">
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
 
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
+
+  return (
+    <motion.div 
+      className="bg-[#0F172A] min-h-screen text-[#F8FAFC]"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}>
+      
+      {/* Loading overlay */}
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            className="fixed inset-0 bg-[#0B1120] flex items-center justify-center z-50"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div
+              className="flex flex-col items-center"
+              initial={{ scale: 0.8 }}
+              animate={{ 
+                scale: [0.8, 1.1, 1],
+              }}
+              transition={{ duration: 1, times: [0, 0.7, 1] }}
+            >
+              <div className="w-16 h-16 mb-4 relative">
+                <motion.div 
+                  className="absolute inset-0 rounded-full bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7]"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  style={{ borderRadius: "50%" }}
+                />
+                <div className="absolute inset-2 bg-[#0B1120] rounded-full"></div>
+              </div>
+              <motion.p 
+                className="text-[#3EDBD3] font-medium"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                Loading Projects...
+              </motion.p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Filters Sidebar */}
-          <aside className="lg:w-72 bg-[#1E293B] rounded-lg shadow-md p-6 h-fit border border-[#3EDBD3]/20">
+          <motion.aside 
+            className="lg:w-72 bg-[#1E293B] rounded-lg shadow-md p-6 h-fit border border-[#3EDBD3]/20"
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}>
             <div className="relative mb-6">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">🔍</span>
               <input
@@ -282,7 +374,7 @@ const FindProjects = () => {
                   placeholder="Max"
                   value={maxBudget}
                   onChange={(e) => setMaxBudget(parseInt(e.target.value))}
-                  className="w-full p-2 border border-gray-300 rounded"
+                  className="w-full p-2 bg-[#0B1120] border border-[#3EDBD3]/30 rounded text-[#F8FAFC]"
                 />
               </div>
             </div>
@@ -341,22 +433,37 @@ const FindProjects = () => {
               </div>
             </div>
 
-            <button
+            <motion.button
               className="w-full bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] text-[#0F172A] py-2 rounded font-medium hover:opacity-90 transition-opacity"
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ 
+                boxShadow: "0 0 8px rgba(62, 219, 211, 0.5)",
+              }}
             >
               Apply Filters
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={resetFilters}
               className="w-full text-[#3EDBD3] py-2 mt-2 font-medium hover:underline"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               Reset All
-            </button>
-          </aside>
+            </motion.button>
+          </motion.aside>
 
           {/* Projects Section */}
-          <section className="flex-1">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <motion.section 
+            className="flex-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <motion.div 
+              className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.3, delay: 0.4 }}>
               <div className="text-lg font-semibold mb-4 sm:mb-0">
                 528 projects found
               </div>
@@ -391,12 +498,31 @@ const FindProjects = () => {
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Projects List */}
-            <div className="space-y-4">
-              {projectsList.map(project => (
-                <div key={project.id} className="bg-[#1E293B] rounded-lg shadow-md p-6 hover:translate-y-[-2px] transition-transform border border-[#3EDBD3]/10">
+            <motion.div 
+              className="space-y-4"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {projectsList.map((project, index) => (
+                <motion.div 
+                  key={project.id} 
+                  className={`bg-[#1E293B] rounded-lg shadow-md p-6 border ${activeProjectId === project.id ? 'border-[#FF6EC7]' : 'border-[#3EDBD3]/10'}`}
+                  animate={activeProjectId === project.id ? {
+                    borderColor: ["rgba(255,110,199,0.3)", "rgba(255,110,199,1)", "rgba(255,110,199,0.3)"],
+                    boxShadow: ["0 0 0 rgba(255,110,199,0)", "0 0 20px rgba(255,110,199,0.5)", "0 0 0 rgba(255,110,199,0)"]
+                  } : {}}
+                  variants={itemVariants}
+                  whileHover={{ 
+                    y: -5,
+                    boxShadow: "0 10px 25px -5px rgba(62, 219, 211, 0.1)",
+                    borderColor: "rgba(62, 219, 211, 0.3)"
+                  }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
                   <div className="flex flex-col sm:flex-row justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-[#3EDBD3] mb-1">{project.title}</h3>
@@ -433,52 +559,95 @@ const FindProjects = () => {
                     </div>
 
                     <div className="flex items-center">
-                      <button
+                      <motion.button
                         onClick={() => toggleSaveProject(project.id)}
                         className="text-xl text-[#94A3B8] hover:text-[#FF6EC7] mr-4"
+                        whileHover={{ scale: 1.2 }}
+                        whileTap={{ scale: 0.9 }}
                       >
                         {project.saved ? '❤️' : '♡'}
-                      </button>
-                      <button
+                      </motion.button>
+                      <motion.button
                         onClick={() => applyToProject(project.id)}
                         className="bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] text-[#0F172A] px-4 py-2 rounded font-medium hover:opacity-90 transition-opacity"
+                        whileHover={{ 
+                          scale: 1.05,
+                          boxShadow: "0 0 8px rgba(62, 219, 211, 0.5)"
+                        }}
+                        whileTap={{ scale: 0.95 }}
                       >
                         Apply Now
-                      </button>
+                      </motion.button>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Pagination */}
-            <div className="flex justify-center mt-8 gap-1">
-              <button className="w-10 h-10 border border-[#3EDBD3]/30 rounded flex items-center justify-center hover:bg-[#0B1120] text-[#94A3B8]">
+            <motion.div 
+              className="flex justify-center mt-8 gap-1"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.4 }}
+            >
+              <motion.button 
+                className="w-10 h-10 border border-[#3EDBD3]/30 rounded flex items-center justify-center hover:bg-[#0B1120] text-[#94A3B8]"
+                whileHover={{ scale: 1.1, borderColor: "rgba(62, 219, 211, 0.5)" }}
+                whileTap={{ scale: 0.9 }}
+              >
                 ←
-              </button>
-              <button className="w-10 h-10 border border-[#3EDBD3] rounded flex items-center justify-center bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] text-[#0F172A]">
+              </motion.button>
+              <motion.button 
+                className="w-10 h-10 border border-[#3EDBD3] rounded flex items-center justify-center bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] text-[#0F172A]"
+                whileHover={{ 
+                  scale: 1.1,
+                  boxShadow: "0 0 8px rgba(62, 219, 211, 0.5)"
+                }}
+                whileTap={{ scale: 0.9 }}
+              >
                 1
-              </button>
-              <button className="w-10 h-10 border border-gray-300 rounded flex items-center justify-center hover:bg-gray-100">
+              </motion.button>
+              <motion.button 
+                className="w-10 h-10 border border-[#3EDBD3]/30 rounded flex items-center justify-center hover:bg-[#0B1120] text-[#94A3B8]"
+                whileHover={{ scale: 1.1, borderColor: "rgba(62, 219, 211, 0.5)" }}
+                whileTap={{ scale: 0.9 }}
+              >
                 2
-              </button>
-              <button className="w-10 h-10 border border-gray-300 rounded flex items-center justify-center hover:bg-gray-100">
+              </motion.button>
+              <motion.button 
+                className="w-10 h-10 border border-[#3EDBD3]/30 rounded flex items-center justify-center hover:bg-[#0B1120] text-[#94A3B8]"
+                whileHover={{ scale: 1.1, borderColor: "rgba(62, 219, 211, 0.5)" }}
+                whileTap={{ scale: 0.9 }}
+              >
                 3
-              </button>
-              <button className="w-10 h-10 border border-gray-300 rounded flex items-center justify-center hover:bg-gray-100">
+              </motion.button>
+              <motion.button 
+                className="w-10 h-10 border border-[#3EDBD3]/30 rounded flex items-center justify-center hover:bg-[#0B1120] text-[#94A3B8]"
+                whileHover={{ scale: 1.1, borderColor: "rgba(62, 219, 211, 0.5)" }}
+                whileTap={{ scale: 0.9 }}
+              >
                 4
-              </button>
-              <button className="w-10 h-10 border border-gray-300 rounded flex items-center justify-center hover:bg-gray-100">
+              </motion.button>
+              <motion.button 
+                className="w-10 h-10 border border-[#3EDBD3]/30 rounded flex items-center justify-center hover:bg-[#0B1120] text-[#94A3B8]"
+                whileHover={{ scale: 1.1, borderColor: "rgba(62, 219, 211, 0.5)" }}
+                whileTap={{ scale: 0.9 }}
+              >
                 5
-              </button>
-              <button className="w-10 h-10 border border-gray-300 rounded flex items-center justify-center hover:bg-gray-100">
+              </motion.button>
+              <motion.button 
+                className="w-10 h-10 border border-[#3EDBD3]/30 rounded flex items-center justify-center hover:bg-[#0B1120] text-[#94A3B8]"
+                whileHover={{ scale: 1.1, borderColor: "rgba(62, 219, 211, 0.5)" }}
+                whileTap={{ scale: 0.9 }}
+              >
                 →
-              </button>
-            </div>
-          </section>
+              </motion.button>
+            </motion.div>
+          </motion.section>
         </div>
       </main>
-    </div>
+    </motion.div>
   );
 };
 
