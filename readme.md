@@ -61,13 +61,8 @@ cd Cognizance-2025
 
 2. **Install dependencies**
 ```bash
-# Install server dependencies
-cd server
 npm install
-
-# Install client dependencies
-cd ../client
-npm install
+npm run dev
 ```
 
 3. **Environment Variables**
@@ -87,12 +82,6 @@ CLIENT_URL=http://localhost:5173
 
 4. **Start the development servers**
 ```bash
-# Start the backend server
-cd server
-npm run dev
-
-# In a new terminal, start the frontend
-cd client
 npm run dev
 ```
 
