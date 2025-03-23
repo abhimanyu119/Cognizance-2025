@@ -25,27 +25,27 @@ export default function Navbar() {
   };
 
   const isActive = (path) => {
-    return location.pathname === path ? "text-teal-400 font-medium" : "";
+    return location.pathname === path ? "text-[#3EDBD3] font-medium" : "";
   };
 
   // Dynamic navbar links based on auth status and user role
   const getNavLinks = () => {
     // Links for non-authenticated users
-    // if (!isLoggedIn) {
-    //   return [{ to: "/how-it-works", label: "How it Works" }];
-    // }
+    if (!isLoggedIn) {
+      return [];
+    }
 
     //Employers
     if (userData.role === "Employer") {
       return [
         { to: "/browse-freelancers", label: "Browse Freelancers" },
         { to: "/post-job", label: "Post a job" },
-        // { to: "/how-it-works", label: "How it Works" },
       ];
     }
 
     //Freelancers
     return [
+    
       { to: "/find-projects", label: "find projects" },
       { to: "/active-projects", label: "Active projects" },
 
@@ -77,12 +77,12 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky w-full top-0 z-50 bg-[#0F172A] shadow-lg border-b border-[#1E293B]">
+    <nav className="sticky w-full top-0 z-50 bg-[#0F172A] shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center mr-5">
-            <Link to="/" className="text-xl font-bold bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] bg-clip-text text-transparent">
+            <Link to="/" className="text-xl font-bold text-[#3EDBD3]">
               PayCraft
             </Link>
           </div>
@@ -90,12 +90,12 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center justify-between w-full md:space-x-8">
             {/* Main Navigation Links */}
-            <div className="flex space-x-6">
+            <div className="flex justify-center mx-auto">
               {getNavLinks().map((link, index) => (
                 <Link
                   key={index}
                   to={link.to}
-                  className={`hover:text-[#3EDBD3] transition-colors px-1 py-2 text-sm font-medium text-[#94A3B8] ${isActive(
+                  className={`hover:text-[#3EDBD3] transition-colors px-1 py-2 text-sm font-medium text-[#F8FAFC] ${isActive(
                     link.to
                   )}`}
                 >
@@ -110,13 +110,13 @@ export default function Navbar() {
                 <>
                   <Link
                     to="/login"
-                    className="text-sm font-medium text-[#F8FAFC] hover:text-[#3EDBD3] transition-colors"
+                    className="text-sm font-medium text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
                   >
                     Login
                   </Link>
                   <Link
                     to="/signup"
-                    className="bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] text-[#0F172A] px-4 py-2 rounded-md text-sm font-medium hover:shadow-lg hover:shadow-[#3EDBD3]/20 transition-all"
+                    className="bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] text-[#0F172A] px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-colors"
                   >
                     Sign Up
                   </Link>
@@ -159,7 +159,7 @@ export default function Navbar() {
                       onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                       className="flex items-center space-x-2 focus:outline-none cursor-pointer group"
                     >
-                      <span className="text-sm font-medium text-[#F8FAFC] group-hover:text-[#3EDBD3]">
+                      <span className="text-sm font-medium text-[#F8FAFC]">
                         {userData.username}
                       </span>
                       <div className="w-9 h-9 ring-2 ring-[#3EDBD3]/50 rounded-full overflow-hidden">
@@ -171,8 +171,8 @@ export default function Navbar() {
                     </button>
 
                     {isProfileMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-[#1E293B] rounded-md shadow-lg py-1 z-20 ring-1 ring-[#3EDBD3]/20">
-                        <div className="px-4 py-2 text-xs text-[#94A3B8] border-b border-[#0B1120]/50">
+                      <div className="absolute right-0 mt-2 w-48 bg-[#1E293B] rounded-md shadow-lg py-1 z-20 ring-1 ring-black ring-opacity-5">
+                        <div className="px-4 py-2 text-xs text-[#94A3B8] border-b border-[#0B1120]">
                           Signed in as{" "}
                           <span className="font-medium capitalize text-[#3EDBD3]">
                             {user.role}
@@ -182,14 +182,14 @@ export default function Navbar() {
                           <Link
                             key={index}
                             to={item.to}
-                            className="block px-4 py-2 text-sm text-[#F8FAFC] hover:bg-[#0B1120] hover:text-[#3EDBD3]"
+                            className="block px-4 py-2 text-sm text-[#F8FAFC] hover:bg-[#0B1120]"
                             onClick={() => setIsProfileMenuOpen(false)}
                           >
                             {item.label}
                           </Link>
                         ))}
                         <button
-                          className="block px-4 py-2 w-full text-left text-sm text-[#F8FAFC] hover:bg-[#0B1120] hover:text-[#FF6EC7]"
+                          className="block px-4 py-2 w-full text-left text-sm text-[#F8FAFC] hover:bg-[#0B1120]"
                           onClick={() => {
                             localStorage.removeItem("token");
                             localStorage.removeItem("user");
@@ -211,7 +211,7 @@ export default function Navbar() {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-[#94A3B8] hover:text-[#3EDBD3] hover:bg-[#1E293B] focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#0B1120] focus:outline-none"
             >
               {isMenuOpen ? (
                 <XIcon className="block h-6 w-6" aria-hidden="true" />
@@ -233,8 +233,8 @@ export default function Navbar() {
                 to={link.to}
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isActive(link.to)
-                    ? "bg-[#1E293B] text-[#3EDBD3]"
-                    : "text-[#94A3B8] hover:bg-[#1E293B] hover:text-[#3EDBD3]"
+                    ? "bg-[#0F172A] text-[#3EDBD3]"
+                    : "text-[#F8FAFC] hover:bg-[#0F172A] hover:text-[#3EDBD3]"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -244,19 +244,19 @@ export default function Navbar() {
           </div>
 
           {/* Mobile auth or user sections */}
-          <div className="pt-4 pb-3 border-t border-[#1E293B]">
+          <div className="pt-4 pb-3 border-t border-[#0F172A]">
             {!isLoggedIn ? (
               <div className="flex justify-around mt-3 px-2">
                 <Link
                   to="/login"
-                  className="w-full text-center block px-4 py-2 text-base font-medium text-[#F8FAFC] hover:text-[#3EDBD3] hover:bg-[#1E293B] rounded-md"
+                  className="w-full text-center block px-4 py-2 text-base font-medium text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#0F172A] rounded-md"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
                   to="/signup"
-                  className="w-full text-center block px-4 py-2 text-base font-medium bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] text-[#0F172A] hover:shadow-lg hover:shadow-[#3EDBD3]/20 rounded-md"
+                  className="w-full text-center block px-4 py-2 text-base font-medium bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] text-[#0F172A] hover:opacity-90 rounded-md"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Sign Up
@@ -277,7 +277,7 @@ export default function Navbar() {
                     <div className="text-base font-medium text-[#F8FAFC]">
                       {userData.username}
                     </div>
-                    <div className="text-sm font-medium text-[#3EDBD3]">
+                    <div className="text-sm font-medium text-[#94A3B8]">
                       {userData.role}
                     </div>
                   </div>
@@ -285,7 +285,7 @@ export default function Navbar() {
                 <div className="mt-3 space-y-1 px-2">
                   <Link
                     to="/messages"
-                    className="flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#3EDBD3] hover:bg-[#1E293B]"
+                    className="flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#3EDBD3] hover:bg-[#0F172A]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <span>Messages</span>
@@ -297,7 +297,7 @@ export default function Navbar() {
                   </Link>
                   <Link
                     to="/notifications"
-                    className="flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#3EDBD3] hover:bg-[#1E293B]"
+                    className="flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#3EDBD3] hover:bg-[#0F172A]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <span>Notifications</span>
@@ -311,7 +311,7 @@ export default function Navbar() {
                     <Link
                       key={index}
                       to={item.to}
-                      className="block px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#3EDBD3] hover:bg-[#1E293B]"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#3EDBD3] hover:bg-[#0F172A]"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {item.label}
