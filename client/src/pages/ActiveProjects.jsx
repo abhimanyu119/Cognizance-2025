@@ -223,8 +223,8 @@ const ActiveProjects = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  return (
-    <div className="w-full  mb-6">
+  return ( 
+    <div className="w-full  pb-[10rem] px-10 bg-[#1E293B] ">
       <div 
         className={`p-6 bg-[#1E293B]   border-[#3EDBD3]/10 scroll-animate transition-all duration-700 ease-out hover:shadow-[0_10px_25px_-15px_rgba(74,123,247,0.5)] transform hover:-translate-y-2 transition-transform duration-300 ${
           visible ? 'opacity-100 translate-y-0 translate-x-0' : 'opacity-0 -translate-y-12'
@@ -233,10 +233,10 @@ const ActiveProjects = () => {
       >
         {ripple && <div className="absolute inset-0 bg-[#4A7BF7]/5 animate-ripple rounded-lg"></div>}
         <div className="flex items-center mb-5">
-          <div className="p-2 mt-10 rounded-full bg-[#4A7BF7]/10 mr-3">
+          <div className="p-2  rounded-full bg-[#4A7BF7]/10 mr-3">
             <Briefcase className="text-[#4A7BF7]" size={20} />
           </div>
-          <h2 className="text-xl font-semibold text-[#F8FAFC] py-20">Active Projects</h2>
+          <h2 className="text-xl font-semibold text-[#F8FAFC] py-10">Active Projects</h2>
           <span className=" text-[#94A3B8] text-sm ml-20">&nbsp;&nbsp;&nbsp;{projectsData.length} ongoing projects</span>
         </div>
         

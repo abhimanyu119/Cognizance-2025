@@ -24,8 +24,9 @@ export default function Navbar() {
     unreadNotifications: 5,
   };
 
+  // Fixed isActive function to properly detect active routes
   const isActive = (path) => {
-    return location.pathname === path ? "text-[#3EDBD3] font-medium" : "";
+    return location.pathname === path;
   };
 
   // Dynamic navbar links based on auth status and user role
@@ -45,10 +46,8 @@ export default function Navbar() {
 
     //Freelancers
     return [
-    
       { to: "/find-projects", label: "find projects" },
       { to: "/active-projects", label: "Active projects" },
-
       // { to: "/how-it-works", label: "How it Works" },
     ];
   };
@@ -60,7 +59,7 @@ export default function Navbar() {
       { to: "/settings", label: "Settings" },
     ];
 
-    if (userData.role === "Employer") {
+    if (user.role === "Employer") {
       return [
         ...commonItems.slice(0, 1),
         { to: "/payment-methods", label: "Payment Methods" },
@@ -90,14 +89,16 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center justify-between w-full md:space-x-8">
             {/* Main Navigation Links */}
-            <div className="flex justify-center mx-auto">
+            <div className="flex justify-center mx-auto space-x-6">
               {getNavLinks().map((link, index) => (
                 <Link
                   key={index}
                   to={link.to}
-                  className={`hover:text-[#3EDBD3] transition-colors px-1 py-2 text-sm font-medium text-[#F8FAFC] ${isActive(
-                    link.to
-                  )}`}
+                  className={`px-1 py-2 text-sm font-medium transition-colors ${
+                    isActive(link.to)
+                      ? "text-[#3EDBD3] font-medium"
+                      : "text-[#F8FAFC] hover:text-[#3EDBD3]"
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -160,12 +161,12 @@ export default function Navbar() {
                       className="flex items-center space-x-2 focus:outline-none cursor-pointer group"
                     >
                       <span className="text-sm font-medium text-[#F8FAFC]">
-                        {userData.username}
+                        {user.name}
                       </span>
                       <div className="w-9 h-9 ring-2 ring-[#3EDBD3]/50 rounded-full overflow-hidden">
                         <Avatar
-                          avatar_url={userData.avatar}
-                          username={userData.name}
+                          avatar_url={user.avatar}
+                          username={user.name}
                         />
                       </div>
                     </button>
@@ -269,13 +270,13 @@ export default function Navbar() {
                     <div className="h-10 w-10 ring-2 ring-[#3EDBD3]/50 rounded-full overflow-hidden">
                       <Avatar
                         avatar_url={userData.avatar}
-                        username={userData.username}
+                        username={userData.name}
                       />
                     </div>
                   </div>
                   <div className="ml-3">
                     <div className="text-base font-medium text-[#F8FAFC]">
-                      {userData.username}
+                      {userData.name}
                     </div>
                     <div className="text-sm font-medium text-[#94A3B8]">
                       {userData.role}
@@ -323,6 +324,7 @@ export default function Navbar() {
                       localStorage.removeItem("token");
                       localStorage.removeItem("user");
                       setIsMenuOpen(false);
+                      seti
                       navigate("/login");
                     }}
                   >
