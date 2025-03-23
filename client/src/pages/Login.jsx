@@ -18,7 +18,6 @@ const Login = () => {
     mode: "onChange",
   });
 
-
   const navigate = useNavigate();
   const { token, setIsLoggedIn } = useAuth();  
   useEffect(() => {
