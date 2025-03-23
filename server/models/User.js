@@ -42,6 +42,10 @@ const UserSchema = new mongoose.Schema(
         twitter: String,
       },
     },
+    twoFactorEnabled: {
+    type: Boolean,
+    default: false
+  },
     ethWalletAddress: {
       type: String,
       validate: {

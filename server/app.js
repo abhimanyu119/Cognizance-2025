@@ -6,7 +6,7 @@ const fileUpload = require("express-fileupload");
 const path = require("path");
 const config = require("./config/env");
 const errorHandler = require("./middleware/errorHandler");
-
+const twoFactorRoutes = require("./routes/twoFactorAuth.routes");
 const app = express();
 
 const allowedOrigins = [process.env.FRONTEND_URL.trim()];
@@ -41,7 +41,7 @@ app.options("*", (req, res) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use("/api/auth", twoFactorRoutes);
 // File upload middleware
 app.use(
   fileUpload({

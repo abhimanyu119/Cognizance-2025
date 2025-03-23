@@ -2,80 +2,54 @@ const mongoose = require("mongoose");
 
 const DisputeSchema = new mongoose.Schema(
   {
-    reason: {
-      type: String,
-      required: [true, "Please provide a reason for the dispute"],
-      trim: true,
-    },
-    description: {
-      type: String,
-      required: [true, "Please provide a detailed description"],
-      minlength: [10, "Description must be at least 10 characters"],
-    },
-    status: {
-      type: String,
-      enum: ["open", "under-review", "resolved", "closed"],
-      default: "open",
-    },
-    resolution: {
-      type: String,
-    },
-    projectId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Project",
-      required: true,
-    },
-    milestoneId: {
+    milestone: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Milestone",
       required: true,
     },
-    raisedBy: {
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+      required: true,
+    },
+    raiser: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    assignedToAdmin: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    description: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    attachments: [
+    status: {
+      type: String,
+      enum: ["open", "resolved"],
+      default: "open",
+    },
+    messages: [
       {
-        name: String,
-        url: String,
-        type: String,
-      },
-    ],
-    conversations: [
-      {
-        sender: {
+        user: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
         },
-        message: String,
+        message: {
+          type: String,
+          required: true,
+        },
         timestamp: {
           type: Date,
           default: Date.now,
         },
       },
     ],
-    outcome: {
-      decision: {
-        type: String,
-        enum: ["full-employer", "full-freelancer", "partial"],
-      },
-      amount: Number,
-      reason: String,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
     resolvedAt: Date,
+    resolvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Dispute", DisputeSchema);
