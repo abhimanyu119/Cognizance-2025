@@ -16,6 +16,8 @@ const Login = () => {
   } = useForm({
     mode: "onChange",
   });
+  
+  const {user} = useAuth();
 
   const navigate = useNavigate();
   const { token, setIsLoggedIn } = useAuth();
@@ -71,7 +73,8 @@ const Login = () => {
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
     setIsLoggedIn(true);
-    navigate("/home");
+    navigate("/active-projects");
+    // navigate("/home");
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
