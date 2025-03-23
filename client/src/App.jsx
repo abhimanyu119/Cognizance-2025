@@ -15,6 +15,7 @@ import { useAuth } from "./contexts/AuthContext";
 import  Layout from "./components/Layout";
 import FindProjects from "./pages/FindProjects";
 import NotFound from "./pages/NotFound";
+import ActiveProjects from "./pages/ActiveProjects";
 
 
 // Dummy auth check
@@ -39,6 +40,7 @@ export default function App() {
           <Route element={<ProtectedRoute/>}>
             <Route path="/home" element={<Home />} />
             <Route path="/find-projects" element={<FindProjects />} />
+            <Route path="/active-projects" element={<ActiveProjects />} />
 
             <Route path="/user/:name" element={<Profile />} />
           </Route>

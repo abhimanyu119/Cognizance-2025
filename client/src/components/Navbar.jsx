@@ -25,29 +25,31 @@ export default function Navbar() {
   };
 
   const isActive = (path) => {
-    return location.pathname === path ? "text-blue-600 font-medium" : "";
+    return location.pathname === path ? "text-teal-400 font-medium" : "";
   };
 
   // Dynamic navbar links based on auth status and user role
   const getNavLinks = () => {
     // Links for non-authenticated users
-    if (!isLoggedIn) {
-      return [{ to: "/how-it-works", label: "How it Works" }];
-    }
+    // if (!isLoggedIn) {
+    //   return [{ to: "/how-it-works", label: "How it Works" }];
+    // }
 
     //Employers
     if (userData.role === "Employer") {
       return [
         { to: "/browse-freelancers", label: "Browse Freelancers" },
         { to: "/post-job", label: "Post a job" },
-        { to: "/how-it-works", label: "How it Works" },
+        // { to: "/how-it-works", label: "How it Works" },
       ];
     }
 
     //Freelancers
     return [
       { to: "/find-projects", label: "find projects" },
-      { to: "/how-it-works", label: "How it Works" },
+      { to: "/active-projects", label: "Active projects" },
+
+      // { to: "/how-it-works", label: "How it Works" },
     ];
   };
 
@@ -75,12 +77,12 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky w-full top-0 z-50 bg-white shadow-md">
+    <nav className="sticky w-full top-0 z-50 bg-[#0F172A] shadow-lg border-b border-[#1E293B]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center mr-5">
-            <Link to="/" className="text-xl font-bold text-blue-600">
+            <Link to="/" className="text-xl font-bold bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] bg-clip-text text-transparent">
               PayCraft
             </Link>
           </div>
@@ -93,7 +95,7 @@ export default function Navbar() {
                 <Link
                   key={index}
                   to={link.to}
-                  className={`hover:text-blue-600 transition-colors px-1 py-2 text-sm font-medium ${isActive(
+                  className={`hover:text-[#3EDBD3] transition-colors px-1 py-2 text-sm font-medium text-[#94A3B8] ${isActive(
                     link.to
                   )}`}
                 >
@@ -108,13 +110,13 @@ export default function Navbar() {
                 <>
                   <Link
                     to="/login"
-                    className="text-sm font-medium hover:text-blue-600 transition-colors"
+                    className="text-sm font-medium text-[#F8FAFC] hover:text-[#3EDBD3] transition-colors"
                   >
                     Login
                   </Link>
                   <Link
                     to="/signup"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+                    className="bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] text-[#0F172A] px-4 py-2 rounded-md text-sm font-medium hover:shadow-lg hover:shadow-[#3EDBD3]/20 transition-all"
                   >
                     Sign Up
                   </Link>
@@ -124,11 +126,11 @@ export default function Navbar() {
                   {/* Messages */}
                   <Link
                     to="/messages"
-                    className="relative text-gray-600 hover:text-blue-600"
+                    className="relative text-[#94A3B8] hover:text-[#3EDBD3]"
                   >
                     <MessageSquareIcon className="h-5 w-5" />
                     {userData.unreadMessages > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 bg-[#FF6EC7] text-[#0F172A] text-xs rounded-full h-4 w-4 flex items-center justify-center">
                         {userData.unreadMessages > 9
                           ? "9+"
                           : userData.unreadMessages}
@@ -139,11 +141,11 @@ export default function Navbar() {
                   {/* Notifications */}
                   <Link
                     to="/notifications"
-                    className="relative text-gray-600 hover:text-blue-600"
+                    className="relative text-[#94A3B8] hover:text-[#3EDBD3]"
                   >
                     <BellIcon className="h-5 w-5" />
                     {userData.unreadNotifications > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 bg-[#FF6EC7] text-[#0F172A] text-xs rounded-full h-4 w-4 flex items-center justify-center">
                         {userData.unreadNotifications > 9
                           ? "9+"
                           : userData.unreadNotifications}
@@ -155,12 +157,12 @@ export default function Navbar() {
                   <div className="relative">
                     <button
                       onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                      className="flex items-center space-x-2 focus:outline-none cursor-pointer"
+                      className="flex items-center space-x-2 focus:outline-none cursor-pointer group"
                     >
-                      <span className="text-sm font-medium">
+                      <span className="text-sm font-medium text-[#F8FAFC] group-hover:text-[#3EDBD3]">
                         {userData.username}
                       </span>
-                      <div className="w-9 h-9">
+                      <div className="w-9 h-9 ring-2 ring-[#3EDBD3]/50 rounded-full overflow-hidden">
                         <Avatar
                           avatar_url={userData.avatar}
                           username={userData.name}
@@ -169,25 +171,25 @@ export default function Navbar() {
                     </button>
 
                     {isProfileMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20 ring-1 ring-black ring-opacity-5">
-                        <div className="px-4 py-2 text-xs text-gray-500 border-b">
+                      <div className="absolute right-0 mt-2 w-48 bg-[#1E293B] rounded-md shadow-lg py-1 z-20 ring-1 ring-[#3EDBD3]/20">
+                        <div className="px-4 py-2 text-xs text-[#94A3B8] border-b border-[#0B1120]/50">
                           Signed in as{" "}
-                          <span className="font-medium capitalize">
-                            {userData.role}
+                          <span className="font-medium capitalize text-[#3EDBD3]">
+                            {user.role}
                           </span>
                         </div>
                         {getProfileMenuItems().map((item, index) => (
                           <Link
                             key={index}
                             to={item.to}
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            className="block px-4 py-2 text-sm text-[#F8FAFC] hover:bg-[#0B1120] hover:text-[#3EDBD3]"
                             onClick={() => setIsProfileMenuOpen(false)}
                           >
                             {item.label}
                           </Link>
                         ))}
                         <button
-                          className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-gray-100"
+                          className="block px-4 py-2 w-full text-left text-sm text-[#F8FAFC] hover:bg-[#0B1120] hover:text-[#FF6EC7]"
                           onClick={() => {
                             localStorage.removeItem("token");
                             localStorage.removeItem("user");
@@ -209,7 +211,7 @@ export default function Navbar() {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-[#94A3B8] hover:text-[#3EDBD3] hover:bg-[#1E293B] focus:outline-none"
             >
               {isMenuOpen ? (
                 <XIcon className="block h-6 w-6" aria-hidden="true" />
@@ -223,7 +225,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden">
+        <div className="md:hidden bg-[#0B1120]">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {getNavLinks().map((link, index) => (
               <Link
@@ -231,8 +233,8 @@ export default function Navbar() {
                 to={link.to}
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isActive(link.to)
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                    ? "bg-[#1E293B] text-[#3EDBD3]"
+                    : "text-[#94A3B8] hover:bg-[#1E293B] hover:text-[#3EDBD3]"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -242,19 +244,19 @@ export default function Navbar() {
           </div>
 
           {/* Mobile auth or user sections */}
-          <div className="pt-4 pb-3 border-t border-gray-200">
+          <div className="pt-4 pb-3 border-t border-[#1E293B]">
             {!isLoggedIn ? (
               <div className="flex justify-around mt-3 px-2">
                 <Link
                   to="/login"
-                  className="w-full text-center block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md"
+                  className="w-full text-center block px-4 py-2 text-base font-medium text-[#F8FAFC] hover:text-[#3EDBD3] hover:bg-[#1E293B] rounded-md"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
                   to="/signup"
-                  className="w-full text-center block px-4 py-2 text-base font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-md"
+                  className="w-full text-center block px-4 py-2 text-base font-medium bg-gradient-to-r from-[#3EDBD3] to-[#4A7BF7] text-[#0F172A] hover:shadow-lg hover:shadow-[#3EDBD3]/20 rounded-md"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Sign Up
@@ -264,7 +266,7 @@ export default function Navbar() {
               <>
                 <div className="flex items-center px-4">
                   <div className="flex-shrink-0">
-                    <div className="h-10 w-10">
+                    <div className="h-10 w-10 ring-2 ring-[#3EDBD3]/50 rounded-full overflow-hidden">
                       <Avatar
                         avatar_url={userData.avatar}
                         username={userData.username}
@@ -272,10 +274,10 @@ export default function Navbar() {
                     </div>
                   </div>
                   <div className="ml-3">
-                    <div className="text-base font-medium text-gray-800">
+                    <div className="text-base font-medium text-[#F8FAFC]">
                       {userData.username}
                     </div>
-                    <div className="text-sm font-medium text-gray-500">
+                    <div className="text-sm font-medium text-[#3EDBD3]">
                       {userData.role}
                     </div>
                   </div>
@@ -283,24 +285,24 @@ export default function Navbar() {
                 <div className="mt-3 space-y-1 px-2">
                   <Link
                     to="/messages"
-                    className="flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                    className="flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#3EDBD3] hover:bg-[#1E293B]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <span>Messages</span>
                     {userData.unreadMessages > 0 && (
-                      <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      <span className="bg-[#FF6EC7] text-[#0F172A] text-xs rounded-full h-5 w-5 flex items-center justify-center">
                         {userData.unreadMessages}
                       </span>
                     )}
                   </Link>
                   <Link
                     to="/notifications"
-                    className="flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                    className="flex justify-between items-center px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#3EDBD3] hover:bg-[#1E293B]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <span>Notifications</span>
                     {userData.unreadNotifications > 0 && (
-                      <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      <span className="bg-[#FF6EC7] text-[#0F172A] text-xs rounded-full h-5 w-5 flex items-center justify-center">
                         {userData.unreadNotifications}
                       </span>
                     )}
@@ -309,12 +311,23 @@ export default function Navbar() {
                     <Link
                       key={index}
                       to={item.to}
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#3EDBD3] hover:bg-[#1E293B]"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {item.label}
                     </Link>
                   ))}
+                  <button
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#FF6EC7] hover:bg-[#1E293B]"
+                    onClick={() => {
+                      localStorage.removeItem("token");
+                      localStorage.removeItem("user");
+                      setIsMenuOpen(false);
+                      navigate("/login");
+                    }}
+                  >
+                    Logout
+                  </button>
                 </div>
               </>
             )}
