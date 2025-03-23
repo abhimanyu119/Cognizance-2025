@@ -46,8 +46,8 @@ export default function Navbar() {
 
     //Freelancers
     return [
-      { to: "/find-projects", label: "find projects" },
-      { to: "/active-projects", label: "Active projects" },
+      { to: "/find-projects", label: "Find Projects" },
+      { to: "/active-projects", label: "Active Projects" },
       // { to: "/how-it-works", label: "How it Works" },
     ];
   };
