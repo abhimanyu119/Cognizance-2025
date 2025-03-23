@@ -324,7 +324,6 @@ export default function Navbar() {
                       localStorage.removeItem("token");
                       localStorage.removeItem("user");
                       setIsMenuOpen(false);
-                      seti
                       navigate("/login");
                     }}
                   >
