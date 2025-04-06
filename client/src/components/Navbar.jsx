@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
 import { BellIcon, MessageSquareIcon, MenuIcon, XIcon } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useUser } from "../contexts/UserContext";
-
+import axios from "axios";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,19 +14,113 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
 
-  // Auth state would come from your AuthContext in a real app
-  const userData = {
+  // Create state for user data with fallback values
+  const [userData, setUserData] = useState({
     id: 1,
-    name: "Kaushal",
-    role: "Freelancer", // or "Freelancer"
+    name: "User",
+    username: "User",
+    role: "Freelancer",
     avatar: "",
-    unreadMessages: 3,
-    unreadNotifications: 5,
+    unreadMessages: 0,
+    unreadNotifications: 0,
+  });
+
+  // Fetch real user data from backend
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!isLoggedIn) return;
+      
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        
+        const response = await axios.get('/api/users/me', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        if (response.data.success && response.data.data) {
+          const fetchedUser = response.data.data;
+          setUserData({
+            id: fetchedUser._id || fetchedUser.id || 1,
+            name: fetchedUser.name || "User",
+            username: fetchedUser.username || fetchedUser.name || "User",
+            role: fetchedUser.role || "Freelancer",
+            avatar: fetchedUser.avatar || "",
+            unreadMessages: fetchedUser.unreadMessages || 0,
+            unreadNotifications: fetchedUser.unreadNotifications || 0,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        // Fallback to localStorage if API fails
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if (storedUser) {
+          setUserData({
+            id: storedUser._id || storedUser.id || 1,
+            name: storedUser.name || "User",
+            username: storedUser.username || storedUser.name || "User",
+            role: storedUser.role || "Freelancer",
+            avatar: storedUser.avatar || "",
+            unreadMessages: storedUser.unreadMessages || 0,
+            unreadNotifications: storedUser.unreadNotifications || 0,
+          });
+        }
+      }
+    };
+    
+    fetchUserData();
+    
+    // Set up polling for unread counts
+    const intervalId = setInterval(() => {
+      if (isLoggedIn) {
+        fetchUnreadCounts();
+      }
+    }, 30000); // Check every 30 seconds
+    
+    return () => clearInterval(intervalId);
+  }, [isLoggedIn]);
+
+  // Function to fetch just unread counts
+  const fetchUnreadCounts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      
+      const response = await axios.get('/api/users/unread-counts', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (response.data.success) {
+        setUserData(prev => ({
+          ...prev,
+          unreadMessages: response.data.data.unreadMessages || 0,
+          unreadNotifications: response.data.data.unreadNotifications || 0,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching unread counts:", error);
+    }
   };
 
   // Fixed isActive function to properly detect active routes
   const isActive = (path) => {
     return location.pathname === path;
+  };
+
+  // Get display name with appropriate fallbacks
+  const getDisplayName = () => {
+    // First try user context
+    if (user && user.name) return user.name;
+    
+    // Then try userData state
+    if (userData.name) return userData.name;
+    
+    // Ultimate fallback
+    return "User";
   };
 
   // Dynamic navbar links based on auth status and user role
@@ -36,32 +130,44 @@ export default function Navbar() {
       return [];
     }
 
-    //Employers
-    if (userData.role === "Employer") {
+    // Determine role from multiple possible sources
+    const role = user?.role || userData.role;
+
+    // Employers
+    if (role === "Employer") {
       return [
         { to: "/browse-freelancers", label: "Browse Freelancers" },
         { to: "/post-job", label: "Post a job" },
       ];
     }
 
-    //Freelancers
+    // Freelancers (default)
     return [
       { to: "/find-projects", label: "Find Projects" },
-      { to: "/active-projects", label: "Active Projects" },
-      // { to: "/how-it-works", label: "How it Works" },
+
+      { to: "/how-it-works", label: "How it Works" },
+
     ];
   };
 
   // Profile dropdown menu items
   const getProfileMenuItems = () => {
+    // Get name with fallbacks for URL
+    const displayName = getDisplayName().replace(/\s+/g, '-').toLowerCase();
+    
     const commonItems = [
-      { to: `/user/${user.name}`, label: "My Profile" },
+      { to: `/user/${displayName}`, label: "My Profile" },
       { to: "/settings", label: "Settings" },
     ];
 
-    if (user.role === "Employer") {
+
+    // Determine role from multiple possible sources
+    const role = user?.role || userData.role;
+
+    if (role === "Employer") {
       return [
         ...commonItems.slice(0, 1),
+        { to: "/dashboard", label: "Dashboard" },
         { to: "/payment-methods", label: "Payment Methods" },
         ...commonItems.slice(1),
       ];
@@ -69,6 +175,7 @@ export default function Navbar() {
 
     return [
       ...commonItems.slice(0, 1),
+      { to: "/dashboard", label: "Dashboard" },
       { to: "/portfolio", label: "Portfolio" },
       { to: "/payments", label: "Payments" },
       ...commonItems.slice(1),
@@ -161,13 +268,10 @@ export default function Navbar() {
                       onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                       className="flex items-center space-x-2 focus:outline-none cursor-pointer group"
                     >
-                      <span className="text-sm font-medium text-[#F8FAFC]">
-                        {user.name}
-                      </span>
-                      <div className="w-9 h-9 ring-2 ring-[#3EDBD3]/50 rounded-full overflow-hidden">
+                      <div className="w-9 h-9">
                         <Avatar
-                          avatar_url={user.avatar}
-                          username={user.name}
+                          avatar_url={userData.avatar}
+                          username={getDisplayName()}
                         />
                       </div>
                     </button>
@@ -176,8 +280,8 @@ export default function Navbar() {
                       <div className="absolute right-0 mt-2 w-48 bg-[#1E293B] rounded-md shadow-lg py-1 z-20 ring-1 ring-black ring-opacity-5">
                         <div className="px-4 py-2 text-xs text-[#94A3B8] border-b border-[#0B1120]">
                           Signed in as{" "}
-                          <span className="font-medium capitalize text-[#3EDBD3]">
-                            {user.role}
+                          <span className="font-medium capitalize">
+                            {user?.role || userData.role}
                           </span>
                         </div>
                         {getProfileMenuItems().map((item, index) => (
@@ -271,16 +375,16 @@ export default function Navbar() {
                     <div className="h-10 w-10 ring-2 ring-[#3EDBD3]/50 rounded-full overflow-hidden">
                       <Avatar
                         avatar_url={userData.avatar}
-                        username={userData.name}
+                        username={getDisplayName()}
                       />
                     </div>
                   </div>
                   <div className="ml-3">
-                    <div className="text-base font-medium text-[#F8FAFC]">
-                      {userData.name}
+                    <div className="text-base font-medium text-gray-800">
+                      {getDisplayName()}
                     </div>
-                    <div className="text-sm font-medium text-[#94A3B8]">
-                      {userData.role}
+                    <div className="text-sm font-medium text-gray-500 capitalize">
+                      {user?.role || userData.role}
                     </div>
                   </div>
                 </div>
@@ -320,7 +424,7 @@ export default function Navbar() {
                     </Link>
                   ))}
                   <button
-                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-[#F8FAFC] hover:text-[#FF6EC7] hover:bg-[#1E293B]"
+                    className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                     onClick={() => {
                       localStorage.removeItem("token");
                       localStorage.removeItem("user");
