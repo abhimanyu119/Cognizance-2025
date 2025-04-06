@@ -62,6 +62,7 @@ export default function Landing() {
           data-aos="fade-right"
           data-aos-delay="200"
         >
+          
           <h1>Empowering Freelancers, Ensuring Fair Payments</h1>
           <p>
             PayCraft provides transparent, timely payments with comprehensive
