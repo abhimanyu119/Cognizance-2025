@@ -73,17 +73,17 @@ export default function Landing() {
           </button>
         </div>
         <div className="hero-img">
-          <div className="payment-card" data-aos="fade-up" data-aos-delay="400">
+          <div className="payment-card" data-aos="fade-up" data-aos-delay="800">
             <h4>Website Development</h4>
             <div className="payment-amount">0.8 ETH</div>
             <span className="payment-status">Paid on time</span>
           </div>
-          <div className="payment-card" data-aos="fade-up" data-aos-delay="600">
+          <div className="payment-card" data-aos="fade-up" data-aos-delay="1000">
             <h4>E-commerce Platform</h4>
             <div className="payment-amount">1.5 ETH</div>
             <span className="payment-status">In escrow</span>
           </div>
-          <div className="payment-card" data-aos="fade-up" data-aos-delay="800">
+          <div className="payment-card" data-aos="fade-up" data-aos-delay="1200">
             <h4>Mobile App UI</h4>
             <div className="payment-amount">0.9 ETH</div>
             <span className="payment-status">Payment due</span>
